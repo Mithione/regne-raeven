@@ -30,6 +30,18 @@ Her samler vi ideer. Skriv dem ind under **Nye ideer**, og flyt dem videre, når
   - Senere: frit at flytte ting rundt, vise sit værelse til søskende-profilerne, sæsonting (jul, halloween).
   - Kun guld fra opgaverne – aldrig rigtige penge.
   - Kræver en del tegninger (SVG) – start med et lille sæt pr. kategori og udvid løbende.
+- **Lær 10-finger-systemet:** et nyt område, hvor man træner at skrive på tastaturet – og får XP og guld for det.
+  - Lektioner i fast rækkefølge: grundrækken (asdf jklæ) → øverste række → nederste række → æ, ø, å → store bogstaver → tal og tegn.
+  - Tegnet **dansk tastatur** på skærmen, hvor hver tast har farven på den finger, der skal trykke, og næste tast lyser op. Evt. to hænder, der viser fingeren.
+  - Måling af **præcision** og **hastighed** (ord pr. minut). Præcision tæller mest – man skal hellere skrive rigtigt end hurtigt.
+  - Kobling til matematik: en lektion med taltasterne og regnetegn, hvor man skriver regnestykker (`3/4 + 1/6`).
+  - XP og guld pr. lektion efter præcision og sværhedsgrad; stjerner (1–3) pr. lektion, som man kan forbedre.
+  - Evt. en daglig skriveopgave ved siden af dagens regneopgaver, og egne rævetitler/unlocks for skrivning (fx »Lynpote«).
+- **Bonus for dage i træk:** milepæle ved fx **10, 20 og 50 dage i træk**, hvor man låser noget særligt op.
+  - Man vælger selv, hvad hver milepæl skal give, fx på en »Mine mål«-side: en sjælden avatar, en speciel ting til værelset, en stor guld-bunke eller en særlig titel.
+  - Mulighed for at en forælder kan skrive en **rigtig belønning** ind (fx »Is på fredag« eller »Vælg aftensmad«), som vises, når milepælen nås.
+  - En flamme-tæller 🔥 på forsiden, der viser, hvor langt der er til næste milepæl (»3 dage til 10-dages-bonus«).
+  - Overvej en »fridag« (fx én pr. uge eller købt for guld), så man ikke mister hele sin stime ved én glemt dag.
 
 ## Planlagt
 
