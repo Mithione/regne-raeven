@@ -22,6 +22,8 @@ public class AppDb(DbContextOptions<AppDb> options) : DbContext(options)
             e.Property(p => p.Frame).HasMaxLength(24);
             e.Property(p => p.Background).HasMaxLength(24);
             e.Property(p => p.Theme).HasMaxLength(24);
+            e.Property(p => p.StreakClaims).HasMaxLength(500);
+            e.Property(p => p.StreakRewards).HasMaxLength(2000);
         });
 
         b.Entity<SavedProblem>(e =>

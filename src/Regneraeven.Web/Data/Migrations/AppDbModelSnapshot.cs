@@ -109,6 +109,9 @@ namespace Regneraeven.Web.Data.Migrations
                         .HasMaxLength(24)
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("BestStreak")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Color")
                         .IsRequired()
                         .HasMaxLength(16)
@@ -137,6 +140,17 @@ namespace Regneraeven.Web.Data.Migrations
 
                     b.Property<int>("Streak")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("StreakClaims")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("StreakFreezes")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("StreakRewards")
+                        .HasMaxLength(2000)
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Theme")
                         .HasMaxLength(24)

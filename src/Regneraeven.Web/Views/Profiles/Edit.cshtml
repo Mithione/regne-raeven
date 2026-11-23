@@ -5,9 +5,20 @@
     var shown = CurrentProfile.ShownTitle(Model);
     var next = Unlocks.NextAnything(lvl.Level);
     var foxCount = Unlocks.Avatars.Count(a => Unlocks.IsUnlocked(a, lvl.Level));
-    var frame = Unlocks.Current(UnlockKind.Frame, Model.Frame, lvl.Level);
-    var background = Unlocks.Current(UnlockKind.Background, Model.Background, lvl.Level);
-    var theme = Unlocks.Current(UnlockKind.Theme, Model.Theme, lvl.Level);
+    var owned = CurrentProfile.OwnedStreakItems(Model);
+    var frame = Unlocks.Current(UnlockKind.Frame, Model.Frame, lvl.Level, owned);
+    var background = Unlocks.Current(UnlockKind.Background, Model.Background, lvl.Level, owned);
+    var theme = Unlocks.Current(UnlockKind.Theme, Model.Theme, lvl.Level, owned);
+    var today = DateOnly.FromDateTime(DateTime.Now);
+    var streak = CurrentProfile.LiveStreak(Model, today);
+    var claims = Streaks.ParseClaims(Model.StreakClaims);
+    var realRewards = Streaks.ParseRewards(Model.StreakRewards);
+    Microsoft.AspNetCore.Html.IHtmlContent Preview(CosmeticUnlock item) => item.Kind switch
+    {
+        UnlockKind.Frame => Ui.Avatar(Model.Avatar, Model.Color, "", item.Id, background.Id),
+        UnlockKind.Background => Ui.Avatar(Model.Avatar, Model.Color, "", frame.Id, item.Id),
+        _ => new Microsoft.AspNetCore.Html.HtmlString($"<span class=\"swatch theme-{item.Id}\"><i></i><i></i><i></i></span>"),
+    };
     // XP still needed to reach the next unlock.
     var xpToNext = 0;
     if (next is { } n)
@@ -82,11 +93,11 @@
 {
     var d = Unlocks.Describe(kind);
     var chosenId = kind switch { UnlockKind.Frame => frame.Id, UnlockKind.Background => background.Id, _ => theme.Id };
-    var items = Unlocks.Of(kind);
+    var items = Unlocks.Of(kind).Concat(Streaks.Items.Where(i => i.Kind == kind)).ToList();
     <div class="card" id="@kind.ToString().ToLowerInvariant()">
         <div class="row between">
             <h2 style="margin:0">@d.Icon @d.Plural</h2>
-            <span class="badge orange">@items.Count(i => Unlocks.IsUnlocked(i, lvl.Level)) af @items.Count låst op</span>
+            <span class="badge orange">@items.Count(i => Unlocks.CanUse(kind, i.Id, lvl.Level, owned)) af @items.Count låst op</span>
         </div>
         <p class="muted small">@(kind switch
         {
@@ -97,14 +108,9 @@
         <div class="unlocks">
             @foreach (var item in items)
             {
-                var open = Unlocks.IsUnlocked(item, lvl.Level);
+                var open = Unlocks.CanUse(kind, item.Id, lvl.Level, owned);
                 var chosen = item.Id == chosenId;
-                var preview = kind switch
-                {
-                    UnlockKind.Frame => Ui.Avatar(Model.Avatar, Model.Color, "", item.Id, background.Id),
-                    UnlockKind.Background => Ui.Avatar(Model.Avatar, Model.Color, "", frame.Id, item.Id),
-                    _ => new Microsoft.AspNetCore.Html.HtmlString($"<span class=\"swatch theme-{item.Id}\"><i></i><i></i><i></i></span>"),
-                };
+                var preview = Preview(item);
                 if (open)
                 {
                     <form method="post" action="/profiler/unlock">
@@ -122,13 +128,80 @@
                     <div class="unlock locked-u" title="@item.Description">
                         @preview
                         <b>@item.Name</b>
-                        <span class="lock-badge">🔒 Låses op ved level @item.Level</span>
+                        <span class="lock-badge">@(item.IsStreakItem ? $"🔥 Kan vælges ved {Streaks.MilestoneFor(item)!.Days} dage i træk" : $"🔒 Låses op ved level {item.Level}")</span>
                     </div>
                 }
             }
         </div>
     </div>
 }
+
+<div class="card" id="dage">
+    <div class="row between">
+        <h2 style="margin:0">🔥 Dage i træk</h2>
+        <span class="freezes" title="En fridag dækker en glemt dag. Du får én for hver 7. dag i træk (højst @Streaks.MaxFreezes).">❄️ @Model.StreakFreezes / @Streaks.MaxFreezes fridage</span>
+    </div>
+    <p class="muted small">Klar alle dagens opgaver for at holde flammen i live. Ved hver milepæl får du ekstra XP og vælger selv en eksklusiv belønning.
+       Glemmer du en dag, bruges en fridag automatisk.</p>
+    <div class="row" style="gap:24px;margin-bottom:14px">
+        <div class="row"><span class="flame @(streak == 0 ? "out" : "")">🔥</span><div><div class="flame-count">@streak</div><div class="small muted">dage i træk nu</div></div></div>
+        <div><div class="flame-count">@Model.BestStreak</div><div class="small muted">din rekord</div></div>
+    </div>
+    <div class="milestones">
+        @foreach (var m in Streaks.Milestones)
+        {
+            var reached = Model.BestStreak >= m.Days;
+            var claimed = claims.TryGetValue(m.Days, out var chosenItem);
+            var cls = claimed ? "claimed" : reached ? "ready" : "locked-m";
+            <div class="milestone @cls">
+                <span class="m-icon">@m.Icon</span>
+                <b>@m.Days dage</b>
+                <span class="small muted">+@m.BonusXp XP</span>
+                @if (realRewards.TryGetValue(m.Days, out var real)) { <span class="real-reward">🎁 @real</span> }
+                @if (claimed)
+                {
+                    var item = m.Choices.First(c => c.Id == chosenItem);
+                    <span class="small">✓ Du valgte <b>@item.Name</b></span>
+                }
+                else if (reached)
+                {
+                    <span class="small" style="font-weight:700;color:#b45309">Vælg din belønning:</span>
+                    <div class="choices">
+                        @foreach (var c in m.Choices)
+                        {
+                            <form method="post" action="/profiler/dage/vaelg">
+                                <input type="hidden" name="days" value="@m.Days"><input type="hidden" name="id" value="@c.Id">
+                                <button type="submit" class="choice" title="@c.Description">@Preview(c)<span>@c.Name</span></button>
+                            </form>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <span class="small muted">Om @(m.Days - streak) @(m.Days - streak == 1 ? "dag" : "dage")</span>
+                    <span class="small muted">@string.Join(" eller ", m.Choices.Select(c => c.Name))</span>
+                }
+            </div>
+        }
+    </div>
+
+    <details class="mt">
+        <summary style="cursor:pointer;font-weight:700">👪 For forældre: rigtige belønninger</summary>
+        <p class="muted small">Skriv en belønning i den virkelige verden ved en milepæl – fx »Is på fredag« eller »Vælg aftensmad«. Den vises, når milepælen nås.</p>
+        <form method="post" action="/profiler/dage/beloenninger">
+            <div class="reward-inputs">
+                @foreach (var m in Streaks.Milestones)
+                {
+                    <div>
+                        <label for="reward@(m.Days)">@m.Icon @m.Days dage</label>
+                        <input type="text" id="reward@(m.Days)" name="reward@(m.Days)" value="@realRewards.GetValueOrDefault(m.Days)" maxlength="80" placeholder="Fx Is på fredag" autocomplete="off">
+                    </div>
+                }
+            </div>
+            <button class="btn small mt" type="submit">Gem belønninger</button>
+        </form>
+    </details>
+</div>
 
 <div class="card" id="titler">
     <h2>🏅 Rævetitler</h2>

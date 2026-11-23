@@ -19,6 +19,14 @@ public class Profile
     public int Xp { get; set; }
     public int Streak { get; set; }
     public DateOnly? LastDailyDone { get; set; }
+    /// <summary>Days off (fridage) that cover a missed day – earned every 7th day in a row, max 2.</summary>
+    public int StreakFreezes { get; set; }
+    /// <summary>Longest streak ever – milestones count from this, so they can't be lost.</summary>
+    public int BestStreak { get; set; }
+    /// <summary>Chosen milestone rewards as JSON: {"7":"flammer"}.</summary>
+    public string? StreakClaims { get; set; }
+    /// <summary>Real-life rewards a parent wrote per milestone as JSON: {"7":"Is på fredag"}.</summary>
+    public string? StreakRewards { get; set; }
     /// <summary>The title level the child chose to show (null = newest unlocked).</summary>
     public int? ShownTitleLevel { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

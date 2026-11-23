@@ -58,15 +58,17 @@ public static class Ui
     {
         var level = Core.Progress.Leveling.FromXp(p.Xp).Level;
         var fox = Core.Progress.Unlocks.CanUse(p.Avatar, level) ? p.Avatar : Core.Progress.Unlocks.Avatars[0].Key;
+        var owned = Services.CurrentProfile.OwnedStreakItems(p);
         return Avatar(fox, p.Color, size,
-            Core.Progress.Unlocks.Current(Core.Progress.UnlockKind.Frame, p.Frame, level).Id,
-            Core.Progress.Unlocks.Current(Core.Progress.UnlockKind.Background, p.Background, level).Id);
+            Core.Progress.Unlocks.Current(Core.Progress.UnlockKind.Frame, p.Frame, level, owned).Id,
+            Core.Progress.Unlocks.Current(Core.Progress.UnlockKind.Background, p.Background, level, owned).Id);
     }
 
     /// <summary>The css class for the profile's colour theme (on &lt;body&gt;).</summary>
     public static string ThemeClass(Profile? p) => p is null
         ? "theme-raev"
-        : "theme-" + Core.Progress.Unlocks.Current(Core.Progress.UnlockKind.Theme, p.Theme, Core.Progress.Leveling.FromXp(p.Xp).Level).Id;
+        : "theme-" + Core.Progress.Unlocks.Current(Core.Progress.UnlockKind.Theme, p.Theme, Core.Progress.Leveling.FromXp(p.Xp).Level,
+            Services.CurrentProfile.OwnedStreakItems(p)).Id;
 
     public static string ToHtml(this IHtmlContent content)
     {

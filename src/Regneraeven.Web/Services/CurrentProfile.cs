@@ -47,9 +47,11 @@ public class CurrentProfile(AppDb db, IHttpContextAccessor http)
         return p.ShownTitleLevel is { } l && l <= info.Level ? Leveling.TitleFor(l) : info.Title;
     }
 
-    /// <summary>The streak only counts if the daily tasks were finished today or yesterday.</summary>
-    public static int LiveStreak(Profile p, DateOnly today) =>
-        p.LastDailyDone is { } d && d >= today.AddDays(-1) ? p.Streak : 0;
+    /// <summary>The streak counts if the daily tasks were finished today or yesterday – or the gap is covered by days off.</summary>
+    public static int LiveStreak(Profile p, DateOnly today) => Streaks.Live(p.LastDailyDone, today, p.Streak, p.StreakFreezes);
+
+    /// <summary>Streak items (frames, backgrounds, themes) the child has chosen at milestones.</summary>
+    public static IReadOnlySet<string> OwnedStreakItems(Profile p) => Streaks.OwnedItems(p.StreakClaims);
 }
 
 /// <summary>Pages that work without a chosen child (the profile picker itself).</summary>

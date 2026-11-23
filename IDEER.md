@@ -18,11 +18,6 @@ Her samler vi ideer. Skriv dem ind under **Nye ideer**, og flyt dem videre, når
   - Kun guld fra opgaverne – aldrig rigtige penge.
   - Kræver en del tegninger (SVG) – start med et lille sæt pr. kategori og udvid løbende.
 - **Mere 10-finger:** en daglig skriveopgave ved siden af dagens regneopgaver, egne titler/unlocks for skrivning (fx »Lynpote«), to tegnede hænder der viser fingeren, og guld pr. lektion når guld findes.
-- **Bonus for dage i træk:** milepæle ved fx **10, 20 og 50 dage i træk**, hvor man låser noget særligt op.
-  - Man vælger selv, hvad hver milepæl skal give, fx på en »Mine mål«-side: en sjælden avatar, en speciel ting til værelset, en stor guld-bunke eller en særlig titel.
-  - Mulighed for at en forælder kan skrive en **rigtig belønning** ind (fx »Is på fredag« eller »Vælg aftensmad«), som vises, når milepælen nås.
-  - En flamme-tæller 🔥 på forsiden, der viser, hvor langt der er til næste milepæl (»3 dage til 10-dages-bonus«).
-  - Overvej en »fridag« (fx én pr. uge eller købt for guld), så man ikke mister hele sin stime ved én glemt dag.
 
 ## Planlagt
 
@@ -42,6 +37,8 @@ Her samler vi ideer. Skriv dem ind under **Nye ideer**, og flyt dem videre, når
 - Billede af opgaven fra bogen gemt sammen med en gemt opgave.
 
 ## Lavet
+
+- **Bonus for dage i træk** (23. nov. 2026): milepæle ved 3, 7, 14, 30, 50 og 100 dage med XP-bonus og selvvalgt eksklusiv belønning, fridage (én pr. 7 dage, højst 2), rigtige belønninger fra forældre, flamme-kort på forsiden.
 
 - **Lektier med dato** (23. nov. 2026): flueben + afleveringsdato, »Lektier der skal laves« på forsiden med forsinkede markeret, filter »Lektier« sorteret efter dato.
 

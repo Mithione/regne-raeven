@@ -10,7 +10,11 @@ public sealed record AvatarUnlock(string Id, string Name, int Level, string Desc
 public enum UnlockKind { Frame, Background, Theme }
 
 /// <summary>A frame around the avatar, a background behind it, or a colour theme for the whole program.</summary>
-public sealed record CosmeticUnlock(UnlockKind Kind, string Id, string Name, int Level, string Description);
+/// <remarks>Items from day-streak milestones have <see cref="Level"/> = int.MaxValue: they are only owned by choosing them.</remarks>
+public sealed record CosmeticUnlock(UnlockKind Kind, string Id, string Name, int Level, string Description)
+{
+    public bool IsStreakItem => Level == int.MaxValue;
+}
 
 /// <summary>Something new for the level-up dialog: "🖼️ Ramme: Neon".</summary>
 public sealed record UnlockNews(string Icon, string KindName, string Name);
@@ -87,7 +91,8 @@ public static class Unlocks
     public static AvatarUnlock? Find(string? key) =>
         key is not null && key.StartsWith("fox:", StringComparison.Ordinal) ? Avatars.FirstOrDefault(a => a.Key == key) : null;
 
-    public static CosmeticUnlock? Find(UnlockKind kind, string? id) => id is null ? null : Of(kind).FirstOrDefault(c => c.Id == id);
+    public static CosmeticUnlock? Find(UnlockKind kind, string? id) =>
+        id is null ? null : Of(kind).Concat(Streaks.Items.Where(i => i.Kind == kind)).FirstOrDefault(c => c.Id == id);
 
     public static bool IsUnlocked(AvatarUnlock avatar, int level) => level >= avatar.Level;
     public static bool IsUnlocked(CosmeticUnlock item, int level) => level >= item.Level;
@@ -95,11 +100,13 @@ public static class Unlocks
     /// <summary>May a child at this level use this fox?</summary>
     public static bool CanUse(string? avatar, int level) => Find(avatar) is { } a && IsUnlocked(a, level);
 
-    public static bool CanUse(UnlockKind kind, string? id, int level) => Find(kind, id) is { } c && IsUnlocked(c, level);
+    /// <param name="owned">Streak items the child has chosen (see <see cref="Streaks.OwnedItems"/>).</param>
+    public static bool CanUse(UnlockKind kind, string? id, int level, IReadOnlySet<string>? owned = null) =>
+        Find(kind, id) is { } c && (IsUnlocked(c, level) || c.IsStreakItem && owned?.Contains(c.Id) == true);
 
     /// <summary>The item to show: the chosen one if it is still valid, otherwise the free default.</summary>
-    public static CosmeticUnlock Current(UnlockKind kind, string? id, int level) =>
-        Find(kind, id) is { } c && IsUnlocked(c, level) ? c : Of(kind)[0];
+    public static CosmeticUnlock Current(UnlockKind kind, string? id, int level, IReadOnlySet<string>? owned = null) =>
+        CanUse(kind, id, level, owned) ? Find(kind, id)! : Of(kind)[0];
 
     /// <summary>Avatars unlocked by going from one level to another (for the level-up dialog).</summary>
     public static IEnumerable<AvatarUnlock> UnlockedBetween(int fromLevelExclusive, int toLevelInclusive) =>

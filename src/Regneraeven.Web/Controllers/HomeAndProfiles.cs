@@ -116,7 +116,7 @@ public class ProfilesController(AppDb db, CurrentProfile current) : Controller
     {
         var p = await current.RequireAsync();
         var item = Unlocks.Find(kind, id);
-        if (item is null || !Unlocks.IsUnlocked(item, Leveling.FromXp(p.Xp).Level))
+        if (item is null || !Unlocks.CanUse(kind, id, Leveling.FromXp(p.Xp).Level, CurrentProfile.OwnedStreakItems(p)))
             throw new UserFacingException("Det er ikke låst op endnu.");
         switch (kind)
         {
@@ -127,6 +127,46 @@ public class ProfilesController(AppDb db, CurrentProfile current) : Controller
         await db.SaveChangesAsync();
         TempData["Info"] = $"{Unlocks.Describe(kind).Name}: {item.Name} er valgt.";
         return Redirect($"/profiler/rediger#{kind.ToString().ToLowerInvariant()}");
+    }
+
+    /// <summary>Choose the reward for a reached day-streak milestone. It is put to use straight away.</summary>
+    [HttpPost("dage/vaelg")]
+    public async Task<IActionResult> ClaimStreak(int days, string? id)
+    {
+        var p = await current.RequireAsync();
+        var milestone = Streaks.Milestones.FirstOrDefault(m => m.Days == days) ?? throw new UserFacingException("Ukendt milepæl.");
+        var claims = Streaks.ParseClaims(p.StreakClaims);
+        if (!Streaks.CanClaim(milestone, id ?? "", p.BestStreak, claims))
+            throw new UserFacingException(claims.ContainsKey(days) ? "Du har allerede valgt din belønning for den milepæl." : "Den belønning kan du ikke vælge endnu.");
+        var item = milestone.Choices.First(c => c.Id == id);
+        claims[days] = item.Id;
+        p.StreakClaims = Streaks.FormatClaims(claims);
+        switch (item.Kind)
+        {
+            case UnlockKind.Frame: p.Frame = item.Id; break;
+            case UnlockKind.Background: p.Background = item.Id; break;
+            case UnlockKind.Theme: p.Theme = item.Id; break;
+        }
+        await db.SaveChangesAsync();
+        TempData["Info"] = $"{milestone.Icon} Du har valgt {item.Name} – og den er taget i brug!";
+        return Redirect("/profiler/rediger#dage");
+    }
+
+    /// <summary>A parent writes real-life rewards for the milestones ("Is på fredag").</summary>
+    [HttpPost("dage/beloenninger")]
+    public async Task<IActionResult> SaveStreakRewards(IFormCollection form)
+    {
+        var p = await current.RequireAsync();
+        var rewards = new Dictionary<int, string>();
+        foreach (var m in Streaks.Milestones)
+        {
+            var text = form[$"reward{m.Days}"].ToString().Trim();
+            if (text.Length > 0) rewards[m.Days] = text.Length > 80 ? text[..80] : text;
+        }
+        p.StreakRewards = rewards.Count == 0 ? null : Streaks.FormatClaims(rewards);
+        await db.SaveChangesAsync();
+        TempData["Info"] = "Belønningerne er gemt.";
+        return Redirect("/profiler/rediger#dage");
     }
 
     [HttpPost("slet")]

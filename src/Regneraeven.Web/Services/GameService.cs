@@ -26,7 +26,14 @@ public sealed record AnswerOutcome(
     int TotalXp,
     int Level,
     int LevelPercent,
-    string TitleName);
+    string TitleName,
+    StreakNews? StreakNews = null);
+
+/// <summary>What happened to the day streak when today's tasks were finished.</summary>
+public sealed record StreakNews(int Streak, bool EarnedFreeze, int FreezesUsed, int Freezes, IReadOnlyList<MilestoneNews> Milestones);
+
+/// <summary>A milestone reached for the first time (bonus XP is already added; the reward is chosen on the profile).</summary>
+public sealed record MilestoneNews(int Days, string Icon, int BonusXp, string? RealReward);
 
 /// <summary>The game: today's tasks, training, XP, levels and the daily streak.</summary>
 public class GameService(AppDb db, TimeProvider clock)
@@ -127,22 +134,39 @@ public class GameService(AppDb db, TimeProvider clock)
         if (t.Status != GameTaskStatus.Open) t.FinishedAt = DateTime.UtcNow;
 
         var bonus = 0;
+        StreakNews? streakNews = null;
         if (t.IsDaily && t.Status != GameTaskStatus.Open && t.Day == Today && p.LastDailyDone != Today)
         {
             var open = await db.GameTasks.CountAsync(o => o.ProfileId == p.Id && o.Day == Today && o.IsDaily && o.Status == GameTaskStatus.Open && o.Id != t.Id);
             if (open == 0)
             {
-                p.Streak = p.LastDailyDone == Today.AddDays(-1) ? p.Streak + 1 : 1;
-                p.LastDailyDone = Today;
-                bonus = Leveling.DailyBonus(p.Streak);
-                Award(p, bonus, $"Alle dagens opgaver klaret ({p.Streak} {(p.Streak == 1 ? "dag" : "dage i træk")})");
+                streakNews = FinishDay(p);
+                bonus = Leveling.DailyBonus(p.Streak) + streakNews.Milestones.Sum(m => m.BonusXp);
             }
         }
 
         await db.SaveChangesAsync();
         var after = Leveling.FromXp(p.Xp);
         var levelUp = LevelUpBetween(before.Level, after.Level);
-        return Outcome(p, t, task, correct, message, xp, bonus, levelUp);
+        return Outcome(p, t, task, correct, message, xp, bonus, levelUp) with { StreakNews = streakNews };
+    }
+
+    /// <summary>All of today's tasks are done: move the streak on (using days off if needed) and pay out bonuses.</summary>
+    private StreakNews FinishDay(Profile p)
+    {
+        var advance = Streaks.Advance(p.LastDailyDone, Today, p.Streak, p.StreakFreezes);
+        p.Streak = advance.Streak;
+        p.StreakFreezes = advance.Freezes;
+        p.LastDailyDone = Today;
+        Award(p, Leveling.DailyBonus(p.Streak), $"Alle dagens opgaver klaret ({p.Streak} {(p.Streak == 1 ? "dag" : "dage i træk")})");
+
+        var rewards = Streaks.ParseRewards(p.StreakRewards);
+        var reached = Streaks.ReachedBetween(p.BestStreak, p.Streak).ToList();
+        foreach (var m in reached) Award(p, m.BonusXp, $"{m.Icon} {m.Days} dage i træk");
+        p.BestStreak = Math.Max(p.BestStreak, p.Streak);
+
+        return new StreakNews(p.Streak, advance.EarnedFreeze, advance.FreezesUsed, p.StreakFreezes,
+            reached.Select(m => new MilestoneNews(m.Days, m.Icon, m.BonusXp, rewards.GetValueOrDefault(m.Days))).ToList());
     }
 
     private AnswerOutcome Outcome(Profile p, GameTask t, MathTask task, bool correct, string message, int xp, int bonus, LevelUp? levelUp)

@@ -14,7 +14,6 @@
         <h1 class="row" style="gap:14px">@Ui.Avatar(p) @greeting, @p.Name!</h1>
         <div class="muted">Hvad skal vi regne i dag?</div>
     </div>
-    @if (Model.Streak > 0) { <span class="streak">🔥 @Model.Streak @(Model.Streak == 1 ? "dag" : "dage i træk")</span> }
 </div>
 
 <div class="grid two">
@@ -57,6 +56,43 @@
         }
     </div>
     <div class="mt"><partial name="_DailyStrip" model="(Model.Daily, (int?)null)" /></div>
+</div>
+
+@{
+    var nextMilestone = Streaks.Next(Model.Streak);
+    var prevDays = Streaks.Milestones.LastOrDefault(m => m.Days <= Model.Streak)?.Days ?? 0;
+    var claims = Streaks.ParseClaims(p.StreakClaims);
+    var unclaimed = Streaks.Milestones.Where(m => p.BestStreak >= m.Days && !claims.ContainsKey(m.Days)).ToList();
+    var doneToday = p.LastDailyDone == Model.Today;
+    var freezeNeeded = !doneToday && Model.Streak > 0 ? Streaks.FreezesInUse(p.LastDailyDone, Model.Today) : 0;
+}
+<div class="card mt">
+    <div class="flame-card">
+        <span class="flame @(Model.Streak == 0 ? "out" : "")">🔥</span>
+        <div style="min-width:140px">
+            <div class="flame-count">@Model.Streak @(Model.Streak == 1 ? "dag" : "dage")</div>
+            <div class="small muted">i træk@(doneToday ? " – klaret i dag ✓" : Model.Streak > 0 ? " – klar dagens opgaver for at fortsætte" : " – klar dagens opgaver for at starte")</div>
+        </div>
+        @if (nextMilestone is not null)
+        {
+            <div style="flex:1;min-width:220px">
+                <div class="small"><b>@(nextMilestone.Days - Model.Streak) @(nextMilestone.Days - Model.Streak == 1 ? "dag" : "dage")</b> til @nextMilestone.Icon @nextMilestone.Days-dages-bonus (+@nextMilestone.BonusXp XP og en belønning du selv vælger)</div>
+                <div class="xpbar sm" style="margin-top:6px"><i style="width:@(100 * (Model.Streak - prevDays) / (nextMilestone.Days - prevDays))%"></i></div>
+            </div>
+        }
+        <span class="freezes" title="En fridag dækker en glemt dag. Du får én for hver 7. dag i træk.">❄️ @p.StreakFreezes fridag@(p.StreakFreezes == 1 ? "" : "e")</span>
+    </div>
+    @if (freezeNeeded > 0)
+    {
+        <div class="tip mt">❄️ Du missede @(freezeNeeded == 1 ? "en dag" : $"{freezeNeeded} dage") – @(freezeNeeded == 1 ? "en fridag" : "fridage") redder din flamme, når du klarer dagens opgaver i dag.</div>
+    }
+    @if (unclaimed.Count > 0)
+    {
+        <div class="claim-banner mt">
+            <span>@unclaimed[0].Icon Du har nået @unclaimed[0].Days dage i træk! Vælg din belønning.</span>
+            <a class="btn small" href="/profiler/rediger#dage">Vælg →</a>
+        </div>
+    }
 </div>
 
 @if (Model.Homework.Count > 0)

@@ -206,6 +206,30 @@
     confetti();
   }
 
+  /** Day-streak news: a milestone (bonus + choose a reward) or a new day off. Calls onClose afterwards. */
+  function streakDialog(news, onClose) {
+    const m = news.milestones.length ? news.milestones[news.milestones.length - 1] : null;
+    const o = document.createElement('div');
+    o.className = 'overlay';
+    o.innerHTML = `<div class="dialog">
+        <div class="emoji">${m ? esc(m.icon) : '❄️'}</div>
+        <h2>${m ? `${m.days} dage i træk!` : 'Ny fridag!'}</h2>
+        ${m ? `<p>Bonus: <span class="xp-pop">+${m.bonusXp} XP</span></p>
+               <p>Du må selv vælge en eksklusiv belønning.</p>
+               ${m.realReward ? `<p class="real-reward" style="display:inline-block;font-size:1rem">🎁 ${esc(m.realReward)}</p>` : ''}` : ''}
+        ${news.earnedFreeze ? `<p>❄️ Du har fået en fridag – den redder din flamme, hvis du glemmer en dag. (${news.freezes} i alt)</p>` : ''}
+        <div class="row" style="justify-content:center">
+          ${m ? '<a class="btn big" href="/profiler/rediger#dage">Vælg belønning</a>' : ''}
+          <button class="btn ${m ? 'secondary' : 'big'}" type="button" data-close>${m ? 'Senere' : 'Fedt! 🦊'}</button>
+        </div>
+      </div>`;
+    const close = () => { o.remove(); onClose && onClose(); };
+    o.querySelector('[data-close]').addEventListener('click', close);
+    o.addEventListener('click', e => { if (e.target === o) close(); });
+    document.body.appendChild(o);
+    confetti();
+  }
+
   /** Updates the XP bar and "Level X · Titel" in the sidebar after XP was earned. */
   function updateSidebar(r) {
     const bar = document.querySelector('.side-profile .xpbar i');
@@ -265,7 +289,9 @@
       else if (!r.finished) xpBadge.textContent = 'Halv XP';
       else xpBadge.textContent = '0 XP';
       if (r.finished) finish(r);
-      if (r.levelUp) setTimeout(() => levelUpDialog(r.levelUp), 500);
+      const news = r.streakNews;
+      if (news && (news.milestones.length || news.earnedFreeze)) setTimeout(() => streakDialog(news, () => r.levelUp && levelUpDialog(r.levelUp)), 500);
+      else if (r.levelUp) setTimeout(() => levelUpDialog(r.levelUp), 500);
       else if (r.dailyBonus > 0) confetti();
     }
 
@@ -471,5 +497,5 @@
     document.getElementById('practice-shuffle')?.addEventListener('click', () => current && render(current, true));
   }
 
-  window.rr = { post, esc, calculator, gameTask, problemForm, tables, confetti, levelUpDialog, updateSidebar };
+  window.rr = { post, esc, calculator, gameTask, problemForm, tables, confetti, levelUpDialog, streakDialog, updateSidebar };
 })();
