@@ -263,22 +263,84 @@
     });
   }
 
-  // ------------------------------------------------------------------ save-problem form: live tag suggestions
+  // ------------------------------------------------------------------ dictation (🎤)
+  // In the Windows program the button opens Windows' own voice typing (Win + H), which understands Danish
+  // and types straight into the focused field. In a normal browser (a future website) the browser's
+  // speech recognition is used. Without either, the button stays hidden.
+  function dictation(target, button, status) {
+    if (!target || !button) return;
+    const host = window.chrome && window.chrome.webview;
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let hideTimer;
+    const say = (html, ms) => {
+      status.innerHTML = html;
+      status.classList.remove('hidden');
+      clearTimeout(hideTimer);
+      if (ms) hideTimer = setTimeout(() => status.classList.add('hidden'), ms);
+    };
+    const focusEnd = () => {
+      target.focus();
+      const n = target.value.length;
+      target.setSelectionRange(n, n);
+      if (n && !/\s$/.test(target.value)) { target.value += ' '; target.dispatchEvent(new Event('input', { bubbles: true })); }
+    };
+
+    if (host) {
+      button.classList.remove('hidden');
+      button.addEventListener('click', () => {
+        focusEnd();
+        host.postMessage({ type: 'dictate' });
+        say("🎤 Sig din opgave nu – Windows' stemmeskrivning skriver den ind. Tryk på mikrofonen i Windows-bjælken (eller <b>Win + H</b>) for at stoppe." +
+            '<br><span class="muted">Virker det ikke? Tjek at stemmeskrivning er sat til <b>dansk</b> i Windows.</span>', 15000);
+      });
+      return;
+    }
+
+    if (SR) {
+      button.classList.remove('hidden');
+      let rec = null;
+      button.addEventListener('click', () => {
+        if (rec) { rec.stop(); return; }
+        focusEnd();
+        const before = target.value;
+        rec = new SR();
+        rec.lang = 'da-DK';
+        rec.interimResults = true;
+        rec.continuous = false;
+        rec.onresult = e => {
+          const heard = [...e.results].map(r => r[0].transcript).join(' ');
+          target.value = before + heard;
+          target.dispatchEvent(new Event('input', { bubbles: true }));
+        };
+        rec.onerror = e => say(e.error === 'not-allowed' ? '🎤 Mikrofonen er ikke tilladt i browseren.' : '🎤 Jeg kunne ikke høre noget. Prøv igen.', 6000);
+        rec.onend = () => { rec = null; button.classList.remove('listening'); button.textContent = '🎤 Indtal'; };
+        rec.start();
+        button.classList.add('listening');
+        button.textContent = '⏹ Stop';
+        say('🎤 Jeg lytter … sig din opgave.', 4000);
+      });
+    }
+  }
+
+  // ------------------------------------------------------------------ save-problem form: live tag suggestions + "heard" math
   function problemForm(isNew) {
     const form = document.querySelector('[data-problem-form]');
     if (!form) return;
     const text = form.querySelector('textarea[name=Text]');
     const boxes = [...form.querySelectorAll('input[data-topic]')];
+    const heard = form.querySelector('[data-heard]');
+    const heardMath = form.querySelector('[data-heard-math]');
     const touched = new Set();
     boxes.forEach(b => b.addEventListener('change', () => touched.add(b.value)));
     let autoChecked = new Set();
     const run = debounce(async () => {
       const q = text.value.trim();
-      let slugs = [];
+      let result = { tags: [], math: null };
       if (q) {
-        try { slugs = await (await fetch('/opgaver/forslag?tekst=' + encodeURIComponent(q), { headers: { Accept: 'application/json' } })).json(); }
+        try { result = await (await fetch('/opgaver/forslag?tekst=' + encodeURIComponent(q), { headers: { Accept: 'application/json' } })).json(); }
         catch { return; }
       }
+      const slugs = result.tags || [];
       boxes.forEach(b => {
         const chip = b.nextElementSibling;
         const suggested = slugs.includes(b.value);
@@ -287,8 +349,18 @@
         if (suggested && !b.checked) { b.checked = true; autoChecked.add(b.value); }
         if (!suggested && autoChecked.has(b.value)) { b.checked = false; autoChecked.delete(b.value); }
       });
+      // Dictated words that form a calculation: offer the written version.
+      if (result.math) { heardMath.textContent = result.math; heard.classList.remove('hidden'); }
+      else heard.classList.add('hidden');
     }, 350);
     text.addEventListener('input', run);
+    form.querySelector('[data-heard-use]')?.addEventListener('click', () => {
+      text.value = heardMath.textContent;
+      heard.classList.add('hidden');
+      text.dispatchEvent(new Event('input', { bubbles: true }));
+      text.focus();
+    });
+    dictation(text, form.querySelector('[data-mic]'), form.querySelector('[data-mic-status]'));
     if (text.value.trim()) run();
   }
 

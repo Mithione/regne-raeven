@@ -8,7 +8,8 @@ public static partial class TopicDetector
 {
     [GeneratedRegex(@"\d\s*/\s*\d")] private static partial Regex FractionRx();
     [GeneratedRegex(@"\d,\d")] private static partial Regex DecimalRx();
-    [GeneratedRegex(@"(^|[\s(=])[-−]\s*\d|\(\s*[-−]")] private static partial Regex NegativeRx();
+    // A minus is a negative sign only at the start or right after "(", "=" or another operator – "12 - 4" is plain minus.
+    [GeneratedRegex(@"(^|[(=+\-−·*×:/÷])\s*[-−]\s*\d|-\s*\d+\s*grader|minus\s*\d+\s*grader")] private static partial Regex NegativeRx();
     [GeneratedRegex(@"\b(km|m|dm|cm|mm|kg|g|l|dl|cl|ml)\b", RegexOptions.IgnoreCase)] private static partial Regex UnitRx();
 
     private static readonly (string Word, Topic Topic)[] Words =

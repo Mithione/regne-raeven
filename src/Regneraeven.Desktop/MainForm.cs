@@ -104,6 +104,23 @@ public sealed class MainForm : Form
         };
         core.DocumentTitleChanged += (_, _) => Text = string.IsNullOrWhiteSpace(core.DocumentTitle) ? "Regneræven" : core.DocumentTitle;
 
+        // Messages from the page. Only Regneræven's own pages may ask, and only for known actions.
+        core.WebMessageReceived += (_, e) =>
+        {
+            if (!IsLocal(e.Source)) return;
+            try
+            {
+                using var msg = JsonDocument.Parse(e.WebMessageAsJson);
+                if (msg.RootElement.TryGetProperty("type", out var type) && type.GetString() == "dictate")
+                {
+                    Activate();
+                    _web.Focus();
+                    VoiceTyping.Start();
+                }
+            }
+            catch (JsonException) { }
+        };
+
         core.Navigate(_start.AbsoluteUri);
     }
 

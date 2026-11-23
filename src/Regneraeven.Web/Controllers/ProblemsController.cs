@@ -167,7 +167,23 @@ public class ProblemsController(AppDb db, CurrentProfile current) : Controller
     /// <summary>Tag suggestions while typing.</summary>
     [HttpGet("forslag")]
     public IActionResult Suggest(string? tekst) =>
-        Json(TopicDetector.Suggest(HelpController.CleanInput(tekst ?? "")).Select(t => t.Info().Slug));
+        SuggestFor(tekst);
+
+    /// <summary>
+    /// Tags for the text, plus – if the text was dictated in words ("tre fjerdedele plus en sjettedel") –
+    /// the calculation written with numbers and signs ("3/4 + 1/6").
+    /// </summary>
+    private JsonResult SuggestFor(string? tekst)
+    {
+        var text = tekst ?? "";
+        var math = SpokenMath.ToExpression(text);
+        if (math is not null && Normalize(math) == Normalize(text)) math = null; // already written like that
+        var tags = TopicDetector.Suggest(HelpController.CleanInput(math ?? text)).Select(t => t.Info().Slug);
+        return Json(new { tags, math });
+    }
+
+    private static string Normalize(string s) => new string(s.Where(c => !char.IsWhiteSpace(c) && c != '?').ToArray())
+        .Replace('*', '·').Replace('x', '·').Replace('X', '·').Replace('−', '-').TrimEnd('=');
 
     private async Task<SavedProblem> Load(int id)
     {

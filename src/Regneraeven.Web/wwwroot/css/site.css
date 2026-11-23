@@ -382,3 +382,11 @@ table.plain th { font-size: .85rem; text-transform: uppercase; letter-spacing: .
 .calc-wrap { display: flex; flex-wrap: wrap; gap: 22px; align-items: flex-start; }
 .calc-wrap > .stack { flex: 1; min-width: 220px; }
 @media (max-width: 1180px) { .split { grid-template-columns: minmax(0, 1fr); } }
+
+/* Dictation */
+.mic-btn.listening { background: var(--red-soft); border-color: #f3c5c0; color: var(--red); animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { box-shadow: 0 0 0 6px rgba(192, 57, 43, .15); } }
+.mic-status { margin-top: 8px; font-size: .9rem; color: var(--ink-2); background: var(--blue-soft); border-radius: 10px; padding: 8px 12px; }
+.heard { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; padding: 10px 14px; border-radius: 12px; background: var(--fox-soft); border: 1px solid #fbd9c0; animation: pop .4s ease; }
+.heard.hidden { display: none; }
+.heard-math { font-size: 1.3rem; font-weight: 800; font-variant-numeric: tabular-nums; }

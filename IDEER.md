@@ -4,10 +4,6 @@ Her samler vi ideer. Skriv dem ind under **Nye ideer**, og flyt dem videre, når
 
 ## Nye ideer
 
-- **Indtal opgaver med mikrofonen** under »Mine opgaver«, så de er nemmere at oprette.
-  - Virker allerede i dag uden ny kode: Windows' stemmeskrivning (**Win + H**) i tekstfeltet. Den skal sættes til dansk.
-  - En mikrofon-knap i programmet: Windows' egen talegenkendelse via Windows-delen (kræver dansk talepakke). På en senere hjemmeside: browserens talegenkendelse.
-  - Omsæt talte tal til regnestykker: »tre fjerdedele plus en sjettedel« → `3/4 + 1/6`, »to komma fem gange fire« → `2,5 · 4`.
 - **Lektier:** et flueben »Det er en lektie« og en afleveringsdato på en gemt opgave.
   - Filter »Lektier« i Mine opgaver, sorteret efter dato.
   - »Lektier der skal afleveres snart« på forsiden, markeret når de er forsinkede.
@@ -61,5 +57,7 @@ Her samler vi ideer. Skriv dem ind under **Nye ideer**, og flyt dem videre, når
 - Billede af opgaven fra bogen gemt sammen med en gemt opgave.
 
 ## Lavet
+
+- **Indtal opgaver med mikrofonen** (23. nov. 2026): 🎤-knap under »Gem en opgave«, der starter Windows' stemmeskrivning (dansk). Talte regnestykker oversættes til tal og tegn med et »Brug det«-forslag. Browserens talegenkendelse bruges, hvis det bliver en hjemmeside.
 
 - Første version: regneregler, trin for trin, tabeller, gemte opgaver med tags, låst lommeregner, regnespil med XP og rævetitler (23. nov. 2026).

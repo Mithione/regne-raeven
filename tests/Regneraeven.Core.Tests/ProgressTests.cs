@@ -43,6 +43,11 @@ public class ProgressTests
     [InlineData("Hvad er arealet af et rektangel, der er 4 cm og 6 cm?", new[] { Topic.Tekststykke, Topic.Geometri }, new Topic[0])]
     [InlineData("2 · x + 5 = 21", new[] { Topic.Ligninger }, new[] { Topic.Tekststykke })]
     [InlineData("Hvad er 25 % af 80?", new[] { Topic.Procent }, new Topic[0])]
+    [InlineData("(12 - 4) · 3/4", new[] { Topic.Minus, Topic.Regnehierarki }, new[] { Topic.NegativeTal })]
+    [InlineData("12 − 4", new[] { Topic.Minus }, new[] { Topic.NegativeTal })]
+    [InlineData("-3 + 8", new[] { Topic.NegativeTal }, new Topic[0])]
+    [InlineData("5 − (−3)", new[] { Topic.NegativeTal }, new Topic[0])]
+    [InlineData("4 · -2", new[] { Topic.NegativeTal }, new Topic[0])]
     public void Suggests_tags(string text, Topic[] expected, Topic[] notExpected)
     {
         var tags = TopicDetector.Suggest(text);

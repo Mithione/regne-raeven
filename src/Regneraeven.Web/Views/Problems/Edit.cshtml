@@ -11,9 +11,18 @@
 <form method="post" action="@(isNew ? "/opgaver/ny" : $"/opgaver/{Model.Id}/rediger")" class="card" style="max-width:820px" data-problem-form>
     <div class="stack">
         <div>
-            <label class="field" for="Text">Opgaven</label>
-            <textarea id="Text" name="Text" required maxlength="2000" placeholder="Skriv regnestykket (fx 3/4 + 1/6) eller hele tekststykket fra bogen" autofocus>@Model.Text</textarea>
-            <div class="field-help">Ræven foreslår tags ud fra det, du skriver ✨</div>
+            <div class="row between" style="margin-bottom:6px">
+                <label class="field" for="Text" style="margin:0">Opgaven</label>
+                <button type="button" class="btn secondary small mic-btn hidden" data-mic title="Indtal opgaven">🎤 Indtal</button>
+            </div>
+            <textarea id="Text" name="Text" required maxlength="2000" placeholder="Skriv regnestykket (fx 3/4 + 1/6) eller hele tekststykket fra bogen – eller tryk 🎤 Indtal og sig det" autofocus>@Model.Text</textarea>
+            <div class="mic-status hidden" data-mic-status></div>
+            <div class="heard hidden" data-heard>
+                <span>🦊 Ræven hørte et regnestykke:</span>
+                <b class="heard-math" data-heard-math></b>
+                <button type="button" class="btn small" data-heard-use>Brug det</button>
+            </div>
+            <div class="field-help">Ræven foreslår tags ud fra det, du skriver eller siger ✨</div>
         </div>
         <div>
             <span class="field" style="display:block;font-weight:700;margin-bottom:6px">Hvilken slags opgave er det?</span>
