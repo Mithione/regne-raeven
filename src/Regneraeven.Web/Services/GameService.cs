@@ -141,13 +141,7 @@ public class GameService(AppDb db, TimeProvider clock)
 
         await db.SaveChangesAsync();
         var after = Leveling.FromXp(p.Xp);
-        var levelUp = after.Level > before.Level
-            ? new LevelUp(before.Level, after.Level,
-                Leveling.TitlesUnlockedBetween(before.Level, after.Level).ToList(),
-                Unlocks.UnlockedBetween(before.Level, after.Level)
-                    .Select(a => new NewAvatar(a.Key, a.Name, a.Description, Infrastructure.AvatarArt.Svg(a.Id))).ToList(),
-                Unlocks.CosmeticsUnlockedBetween(before.Level, after.Level).ToList())
-            : null;
+        var levelUp = LevelUpBetween(before.Level, after.Level);
         return Outcome(p, t, task, correct, message, xp, bonus, levelUp);
     }
 
@@ -161,7 +155,17 @@ public class GameService(AppDb db, TimeProvider clock)
             bonus, CurrentProfile.LiveStreak(p, Today), levelUp, p.Xp, info.Level, info.Percent, CurrentProfile.ShownTitle(p).Name);
     }
 
-    private void Award(Profile p, int amount, string reason)
+    /// <summary>What a level-up unlocked (titles, foxes, frames …), or null if the level didn't change.</summary>
+    public static LevelUp? LevelUpBetween(int from, int to) => to > from
+        ? new LevelUp(from, to,
+            Leveling.TitlesUnlockedBetween(from, to).ToList(),
+            Unlocks.UnlockedBetween(from, to)
+                .Select(a => new NewAvatar(a.Key, a.Name, a.Description, Infrastructure.AvatarArt.Svg(a.Id))).ToList(),
+            Unlocks.CosmeticsUnlockedBetween(from, to).ToList())
+        : null;
+
+    /// <summary>Adds XP to the profile and logs it (saved with the next SaveChanges).</summary>
+    public void Award(Profile p, int amount, string reason)
     {
         if (amount <= 0) return;
         p.Xp += amount;

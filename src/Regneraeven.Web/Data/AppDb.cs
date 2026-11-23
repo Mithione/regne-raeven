@@ -10,6 +10,7 @@ public class AppDb(DbContextOptions<AppDb> options) : DbContext(options)
     public DbSet<ProblemTag> ProblemTags => Set<ProblemTag>();
     public DbSet<GameTask> GameTasks => Set<GameTask>();
     public DbSet<XpEvent> XpEvents => Set<XpEvent>();
+    public DbSet<TypingResult> TypingResults => Set<TypingResult>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -45,6 +46,13 @@ public class AppDb(DbContextOptions<AppDb> options) : DbContext(options)
             e.HasIndex(t => new { t.ProfileId, t.Day, t.IsDaily });
             e.HasOne<Profile>().WithMany().HasForeignKey(t => t.ProfileId).OnDelete(DeleteBehavior.Cascade);
             e.Property(t => t.LastAnswer).HasMaxLength(100);
+        });
+
+        b.Entity<TypingResult>(e =>
+        {
+            e.Property(t => t.LessonId).HasMaxLength(24);
+            e.HasIndex(t => new { t.ProfileId, t.LessonId });
+            e.HasOne<Profile>().WithMany().HasForeignKey(t => t.ProfileId).OnDelete(DeleteBehavior.Cascade);
         });
 
         b.Entity<XpEvent>(e =>

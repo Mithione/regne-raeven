@@ -12,7 +12,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@(string.IsNullOrEmpty(title) ? "Regneræven" : title + " – Regneræven")</title>
     <link rel="icon" href="@Ui.Assets/img/fox.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="@Ui.Assets/css/site.css?v=4">
+    <link rel="stylesheet" href="@Ui.Assets/css/site.css?v=5">
     <meta name="rr-token" content="@Xsrf()">
 </head>
 <body class="@Ui.ThemeClass(profile)">
@@ -31,6 +31,7 @@
             <nav class="nav">
                 <a class="@Active("home")" href="/"><span class="ico">🏠</span>Hjem</a>
                 <a class="@Active("spil")" href="/spil"><span class="ico">🎮</span>Regnespil</a>
+                <a class="@Active("skriv")" href="/skriv"><span class="ico">⌨️</span>10-finger</a>
                 <a class="@Active("opgaver")" href="/opgaver"><span class="ico">📒</span>Mine opgaver</a>
                 <a class="@Active("regler")" href="/regler"><span class="ico">📘</span>Regneregler</a>
                 <a class="@Active("tabeller")" href="/tabeller"><span class="ico">🔢</span>Tabeller</a>
@@ -54,7 +55,7 @@
         @RenderBody()
     </main>
 </div>
-<script src="@Ui.Assets/js/site.js?v=4"></script>
+<script src="@Ui.Assets/js/site.js?v=5"></script>
 @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

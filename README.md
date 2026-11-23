@@ -17,6 +17,7 @@ Programmet er bygget i .NET 8. Brugerfladen er en web-UI, der vises i et alminde
 | **Mine opgaver** | Gem opgaver fra bogen eller lektierne. Ræven foreslår tags ud fra teksten (fx Brøker og Plus), og man kan selv tilføje tags som `lektier uge 48`. Opgaverne kan søges og filtreres på tag og status. |
 | **Lommeregner** | Lommeregneren er **låst**, indtil barnet har skrevet sit eget svar. Derefter kan svaret tjekkes med lommeregneren, med et automatisk tjek (for regnestykker) og med udregningen trin for trin. |
 | **Regnespil** | Der er 8 daglige opgaver på tværs af pensum og en træning, hvor man selv vælger emne og sværhedsgrad. |
+| **10-finger** | Lær at skrive med alle ti fingre på et tegnet dansk tastatur: hver tast har fingerens farve, næste tast lyser op (også den rigtige Shift), og der står hvilken finger der skal bruges. 18 lektioner: grundrækken → øverste og nederste række → æ, ø, å → store bogstaver → tal, regnetegn og regnestykker. Præcision tæller mest (★ ved 90 %, ★★ ved 95 %, ★★★ ved 98 % + fart). Hver ny stjerne giver XP, og næste lektion låses op ved én stjerne. |
 
 ### XP og titler
 

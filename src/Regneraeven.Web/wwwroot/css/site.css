@@ -467,3 +467,51 @@ body.theme-nat .side .btn.ghost { color: #c7d2fe; }
 .swatch i:nth-child(2) { background: var(--fox-soft); }
 .swatch i:nth-child(3) { background: var(--bg); }
 .unlock.locked-u .swatch { filter: grayscale(1); opacity: .45; }
+
+/* ---------- 10-finger typing ---------- */
+.f-lp { --k: #c4b5fd; } .f-lr { --k: #93c5fd; } .f-lm { --k: #86efac; } .f-li { --k: #fdba74; }
+.f-ri { --k: #fde047; } .f-rm { --k: #86efac; } .f-rr { --k: #93c5fd; } .f-rp { --k: #c4b5fd; } .f-th { --k: #e2e8f0; }
+.dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--k); border: 1px solid rgba(0, 0, 0, .15); vertical-align: -1px; }
+kbd { display: inline-block; min-width: 1.5em; padding: 0 5px; border-radius: 6px; border: 1px solid var(--line-2); border-bottom-width: 2px; background: #fff; font-family: var(--mono); font-size: .85em; text-align: center; color: var(--ink); }
+.stars { color: #f5b301; letter-spacing: 1px; font-size: 1.05rem; white-space: nowrap; }
+.stars.s0 { color: #d0d5dd; }
+.lesson-list { display: flex; flex-direction: column; gap: 8px; }
+.lesson-row { display: flex; align-items: center; gap: 14px; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line); background: #fff; }
+.lesson-row.locked { background: #f9fafb; color: var(--muted); }
+.lesson-no { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; background: var(--fox-soft); color: var(--fox-dark); flex: none; }
+.lesson-row.locked .lesson-no { background: #eef0f3; color: var(--muted); }
+.finger-legend { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.typing-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.typing-text {
+  font-family: var(--mono); font-size: 1.7rem; line-height: 1.7; letter-spacing: .02em; padding: 16px 20px; border-radius: 14px;
+  background: #fffdf8; border: 2px solid var(--line); min-height: 120px; max-height: 260px; overflow-y: auto;
+}
+.typing-text .w { white-space: nowrap; }
+.typing-text .ch { color: #98a2b3; border-radius: 4px; }
+.typing-text .ch.sp { color: transparent; }
+.typing-text .ch.ok { color: var(--ink); }
+.typing-text .ch.fixed { color: #b54708; text-decoration: underline wavy #f79009; }
+.typing-text .ch.err { background: var(--red-soft); color: var(--red); }
+.typing-text .ch.sp.ok, .typing-text .ch.sp.fixed { color: transparent; }
+.typing-text .ch.current { background: var(--fox); color: #fff; box-shadow: 0 0 0 2px var(--fox); }
+.typing-text .ch.sp.current { color: rgba(255, 255, 255, .8); }
+.typing-text .ch.current.err { background: var(--red); color: #fff; box-shadow: 0 0 0 2px var(--red); }
+.typing-text.shake { animation: shake .25s; }
+@keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.finger-hint { font-weight: 700; min-height: 1.5em; }
+.keyboard { background: #eef0f4; border-radius: 16px; padding: 10px; display: flex; flex-direction: column; gap: 6px; user-select: none; }
+.kb-row { display: flex; gap: 6px; }
+.kb-key {
+  flex: 1 1 0; min-width: 0; height: 46px; border-radius: 9px; background: color-mix(in srgb, var(--k) 45%, white);
+  border: 1px solid color-mix(in srgb, var(--k) 70%, #667085); border-bottom-width: 3px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; color: #344054; line-height: 1.05; position: relative;
+}
+.kb-key small { font-size: .68rem; color: #667085; font-weight: 600; }
+.kb-key.wide { font-size: .72rem; color: #667085; }
+.kb-key.home { border-bottom-color: #475467; }
+.kb-key.bump::after { content: ""; position: absolute; bottom: 6px; width: 12px; height: 2px; border-radius: 2px; background: #475467; }
+.kb-key.next { background: var(--k); border-color: #1d2939; box-shadow: 0 0 0 3px #1d2939; transform: translateY(-2px); color: #101828; z-index: 1; }
+.typing-result { text-align: center; padding: 18px; border-radius: 18px; background: var(--fox-soft); }
+.big-stars { font-size: 3.2rem; color: #f5b301; letter-spacing: 6px; line-height: 1.1; }
+.big-stars.s0 { color: #d0d5dd; }
+@media (max-width: 900px) { .kb-key { height: 38px; font-size: .85rem; } .typing-text { font-size: 1.3rem; } }

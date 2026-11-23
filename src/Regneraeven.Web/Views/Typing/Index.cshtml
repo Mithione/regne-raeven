@@ -1,0 +1,100 @@
+@model TypingIndexModel
+@{
+    ViewData["Title"] = "10-finger";
+    ViewData["Nav"] = "skriv";
+    var total = TypingCourse.Lessons.Count * 3;
+    var got = Model.BestStars.Values.Sum();
+    var nextUp = TypingCourse.Lessons.FirstOrDefault(l => TypingScore.IsOpen(l, Model.BestStars) && Model.BestStars.GetValueOrDefault(l.Id) == 0)
+                 ?? TypingCourse.Lessons.FirstOrDefault(l => Model.BestStars.GetValueOrDefault(l.Id) < 3);
+}
+<div class="topbar">
+    <div>
+        <h1>⌨️ Lær 10-finger-systemet</h1>
+        <div class="muted">Skriv med alle ti fingre uden at kigge – og få XP for hver stjerne.</div>
+    </div>
+    <span class="streak">⭐ @got / @total stjerner</span>
+</div>
+
+<div class="split">
+    <div class="stack">
+        @if (nextUp is not null)
+        {
+            <div class="card soft row between">
+                <div>
+                    <div class="small muted">Fortsæt med</div>
+                    <b style="font-size:1.15rem">@nextUp.Title</b>
+                    <div class="small muted">@nextUp.Group</div>
+                </div>
+                <a class="btn big" href="/skriv/@nextUp.Id">Start →</a>
+            </div>
+        }
+
+        @foreach (var group in TypingCourse.Lessons.GroupBy(l => l.Group))
+        {
+            <div class="card">
+                <h2>@group.Key</h2>
+                <div class="lesson-list">
+                    @foreach (var l in group)
+                    {
+                        var number = TypingCourse.IndexOf(l) + 1;
+                        var open = TypingScore.IsOpen(l, Model.BestStars);
+                        var stars = Model.BestStars.GetValueOrDefault(l.Id);
+                        <div class="lesson-row @(open ? "" : "locked")">
+                            <span class="lesson-no">@number</span>
+                            <div style="flex:1;min-width:0">
+                                <b>@l.Title</b>
+                                <div class="small muted">
+                                    Nye taster: <span class="keys">@foreach (var c in l.NewKeys) { <kbd>@c</kbd> }</span>
+                                    @if (Model.BestWpm.TryGetValue(l.Id, out var wpm)) { <span> · bedst @wpm ord/min</span> }
+                                </div>
+                            </div>
+                            <span class="stars s@(stars)" title="@stars af 3 stjerner">@(new string('★', stars))@(new string('☆', 3 - stars))</span>
+                            @if (open)
+                            {
+                                <a class="btn small @(stars == 0 ? "" : "secondary")" href="/skriv/@l.Id">@(stars == 0 ? "Start" : "Igen")</a>
+                            }
+                            else
+                            {
+                                <span class="btn small secondary" style="opacity:.6;cursor:default" title="Få mindst én stjerne i lektionen før">🔒</span>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="stack">
+        <div class="card">
+            <h3>Sådan sidder du</h3>
+            <ul class="small" style="padding-left:18px;margin:0">
+                <li>Sid ret op med fødderne i gulvet.</li>
+                <li>Læg pegefingrene på <kbd>F</kbd> og <kbd>J</kbd> – de har små bump.</li>
+                <li>De andre fingre hviler på <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> og <kbd>K</kbd> <kbd>L</kbd> <kbd>Æ</kbd>.</li>
+                <li>Tommelfingrene klarer mellemrum.</li>
+                <li>Kig på skærmen – ikke på tastaturet.</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>Fingrenes farver</h3>
+            <div class="finger-legend small">
+                <span><b class="dot f-lp"></b> Lillefingre</span>
+                <span><b class="dot f-lr"></b> Ringfingre</span>
+                <span><b class="dot f-lm"></b> Langefingre</span>
+                <span><b class="dot f-li"></b> Venstre pegefinger</span>
+                <span><b class="dot f-ri"></b> Højre pegefinger</span>
+                <span><b class="dot f-th"></b> Tommelfingre</span>
+            </div>
+        </div>
+        <div class="card soft small">
+            <b>Stjerner og XP</b>
+            <ul style="padding-left:18px;margin:6px 0 0">
+                <li>★ Mindst 90 % rigtige tastetryk.</li>
+                <li>★★ 95 % og lidt fart.</li>
+                <li>★★★ 98 % og god fart.</li>
+                <li>Hver ny stjerne giver XP. At øve igen giver lidt XP (op til @TypingScore.PracticeRunsPerDay gange om dagen).</li>
+                <li>Næste lektion låses op ved én stjerne.</li>
+            </ul>
+        </div>
+    </div>
+</div>

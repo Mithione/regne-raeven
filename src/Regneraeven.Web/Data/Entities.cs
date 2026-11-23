@@ -92,3 +92,17 @@ public class XpEvent
     public string Reason { get; set; } = "";
     public DateTime At { get; set; } = DateTime.UtcNow;
 }
+
+/// <summary>One run through a 10-finger lesson.</summary>
+public class TypingResult
+{
+    public int Id { get; set; }
+    public int ProfileId { get; set; }
+    /// <summary>Id from Core.Typing.TypingCourse (stable).</summary>
+    public string LessonId { get; set; } = "";
+    public int Stars { get; set; }
+    public int Accuracy { get; set; }
+    public int Wpm { get; set; }
+    public int XpAwarded { get; set; }
+    public DateTime At { get; set; } = DateTime.UtcNow;
+}

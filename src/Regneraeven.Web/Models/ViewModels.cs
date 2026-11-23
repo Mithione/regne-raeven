@@ -36,3 +36,7 @@ public sealed record ProblemDetailsModel(SavedProblem Problem, bool IsExpression
 public sealed record GameHubModel(Profile Profile, List<GameTask> Daily, int Streak, List<XpEvent> RecentXp, Dictionary<Topic, int> SolvedByTopic);
 
 public sealed record GameTaskModel(GameTask Entity, MathTask Task, int FullXp, List<GameTask>? Daily);
+
+public sealed record TypingIndexModel(Dictionary<string, int> BestStars, Dictionary<string, int> BestWpm);
+
+public sealed record TypingLessonModel(Regneraeven.Core.Typing.TypingLesson Lesson, string Text, int BestStars);

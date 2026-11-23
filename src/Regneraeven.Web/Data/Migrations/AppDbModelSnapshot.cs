@@ -188,6 +188,42 @@ namespace Regneraeven.Web.Data.Migrations
                     b.ToTable("Problems");
                 });
 
+            modelBuilder.Entity("Regneraeven.Web.Data.TypingResult", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Accuracy")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("At")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LessonId")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Stars")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Wpm")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("XpAwarded")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfileId", "LessonId");
+
+                    b.ToTable("TypingResults");
+                });
+
             modelBuilder.Entity("Regneraeven.Web.Data.XpEvent", b =>
                 {
                     b.Property<int>("Id")
@@ -242,6 +278,15 @@ namespace Regneraeven.Web.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Profile");
+                });
+
+            modelBuilder.Entity("Regneraeven.Web.Data.TypingResult", b =>
+                {
+                    b.HasOne("Regneraeven.Web.Data.Profile", null)
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Regneraeven.Web.Data.XpEvent", b =>

@@ -1,0 +1,41 @@
+@model TypingLessonModel
+@{
+    var l = Model.Lesson;
+    ViewData["Title"] = l.Title;
+    ViewData["Nav"] = "skriv";
+    var (two, three) = TypingScore.SpeedTargets(l.Difficulty);
+}
+<div class="crumbs"><a href="/skriv">10-finger</a> › @l.Group · Lektion @(TypingCourse.IndexOf(l) + 1) af @TypingCourse.Lessons.Count</div>
+<div class="topbar">
+    <div>
+        <h1 style="margin:0">@l.Title</h1>
+        <div class="muted small">Nye taster: @foreach (var c in l.NewKeys) { <kbd>@c</kbd> } · din bedste: <span class="stars s@(Model.BestStars)">@(new string('★', Model.BestStars))@(new string('☆', 3 - Model.BestStars))</span></div>
+    </div>
+</div>
+
+<div class="card typing" data-typing data-lesson="@l.Id" data-text="@Model.Text">
+    <div class="tip">💡 @l.Tip</div>
+
+    <div class="typing-stats mt">
+        <div class="stat"><b data-acc>100 %</b><span>Præcision</span></div>
+        <div class="stat"><b data-wpm>0</b><span>Ord pr. minut</span></div>
+        <div class="stat"><b data-errors>0</b><span>Fejl</span></div>
+    </div>
+    <div class="xpbar sm mt"><i data-progress style="width:0%"></i></div>
+
+    <div class="typing-text mt" data-typing-text aria-label="Tekst der skal skrives"></div>
+    <div class="row between" style="margin-top:8px">
+        <div class="finger-hint" data-finger></div>
+        <div class="muted small" data-start-hint>Tryk på den første tast for at starte – tiden går først, når du begynder.</div>
+    </div>
+
+    <div class="keyboard mt" data-keyboard aria-hidden="true"></div>
+
+    <div class="hidden mt" data-result></div>
+    <p class="muted small mt">★ ved 90 % · ★★ ved 95 % og @two ord/min · ★★★ ved 98 % og @three ord/min</p>
+</div>
+
+@section Scripts {
+<script src="@Ui.Assets/js/typing.js?v=2"></script>
+<script>rrTyping.lesson(document.querySelector('[data-typing]'));</script>
+}

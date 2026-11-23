@@ -206,6 +206,14 @@
     confetti();
   }
 
+  /** Updates the XP bar and "Level X · Titel" in the sidebar after XP was earned. */
+  function updateSidebar(r) {
+    const bar = document.querySelector('.side-profile .xpbar i');
+    if (bar) bar.style.width = r.levelPercent + '%';
+    const lvlText = document.querySelector('.side-profile .who > span');
+    if (lvlText) lvlText.textContent = `Level ${r.level} · ${r.titleName}`;
+  }
+
   // ------------------------------------------------------------------ game task page
   function gameTask(card) {
     if (!card) return;
@@ -244,11 +252,7 @@
         tile.querySelector('.xp').textContent = r.correct ? `+${r.xpAwarded} XP` : '0 XP';
         if (r.correct) tile.querySelector('.sym').textContent = '✓';
       }
-      // Update the sidebar XP bar.
-      const bar = document.querySelector('.side-profile .xpbar i');
-      if (bar) bar.style.width = r.levelPercent + '%';
-      const lvlText = document.querySelector('.side-profile .who > span');
-      if (lvlText) lvlText.textContent = `Level ${r.level} · ${r.titleName}`;
+      updateSidebar(r);
     }
 
     function show(r) {
@@ -458,5 +462,5 @@
     document.getElementById('practice-shuffle')?.addEventListener('click', () => current && render(current, true));
   }
 
-  window.rr = { post, calculator, gameTask, problemForm, tables, confetti };
+  window.rr = { post, esc, calculator, gameTask, problemForm, tables, confetti, levelUpDialog, updateSidebar };
 })();
