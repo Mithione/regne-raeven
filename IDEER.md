@@ -4,10 +4,6 @@ Her samler vi ideer. Skriv dem ind under **Nye ideer**, og flyt dem videre, når
 
 ## Nye ideer
 
-- **Læs regnereglerne højt** med en rolig stemme: en »🔊 Læs op«-knap på hver regel (og evt. på hvert afsnit).
-  - I profilen: vælg **kvinde- eller mandestemme** og evt. tempo (langsom/normal).
-  - Teknik: browserens/Windows' indbyggede oplæsning (`speechSynthesis`), sat lidt langsommere for en rolig stemme. Opstillinger og tegn som »·«, »:« og »3/4« skal skrives om til ord (»gange«, »divideret med«, »tre fjerdedele«), før de læses op.
-  - Tjek først hvilke danske stemmer der findes på pc'en. Windows har typisk én dansk kvindestemme som standard; en dansk mandestemme kan kræve ekstra stemmer eller en online-tjeneste. Findes kun én, kan valget skjules.
 - **Guld og mit rævehule-værelse:** ud over XP optjener man guld 🪙 fra opgaverne og bruger det på ting til sit eget ræve-værelse.
   - XP kan aldrig bruges (det er ens level); guld kan bruges i butikken. Begge stiger, når man løser opgaver.
   - Guld pr. opgave følger sværhedsgraden (som XP), plus guld-bonus for dagens opgaver og dage i træk. Ingen guld for opgivne opgaver.
@@ -37,6 +33,8 @@ Her samler vi ideer. Skriv dem ind under **Nye ideer**, og flyt dem videre, når
 - Billede af opgaven fra bogen gemt sammen med en gemt opgave.
 
 ## Lavet
+
+- **Læs regnereglerne højt** (23. nov. 2026): 🔊-knapper på reglerne, matematik læses som ord, kvinde-/mandestemme og tempo under profilen (kun dansk kvindestemme på computeren i dag).
 
 - **Bonus for dage i træk** (23. nov. 2026): milepæle ved 3, 7, 14, 30, 50 og 100 dage med XP-bonus og selvvalgt eksklusiv belønning, fridage (én pr. 7 dage, højst 2), rigtige belønninger fra forældre, flamme-kort på forsiden.
 

@@ -138,6 +138,13 @@ namespace Regneraeven.Web.Data.Migrations
                     b.Property<int?>("ShownTitleLevel")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("SpeechRate")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("rolig");
+
                     b.Property<int>("Streak")
                         .HasColumnType("INTEGER");
 
@@ -155,6 +162,13 @@ namespace Regneraeven.Web.Data.Migrations
                     b.Property<string>("Theme")
                         .HasMaxLength(24)
                         .HasColumnType("TEXT");
+
+                    b.Property<string>("Voice")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("kvinde");
 
                     b.Property<int>("Xp")
                         .HasColumnType("INTEGER");

@@ -3,6 +3,7 @@
     var t = Model.Info;
     ViewData["Title"] = t.Name;
     ViewData["Nav"] = "regler";
+    var speech = SpeechText.ForRule(Model);
 }
 <div class="crumbs"><a href="/regler">Regneregler</a> ›</div>
 <div class="topbar">
@@ -21,12 +22,18 @@
 </div>
 
 <div class="split">
-    <div class="card">
-        <p style="font-size:1.12rem">@Model.Intro</p>
-        @foreach (var s in Model.Sections)
+    <div class="card" data-rule-speech>
+        <div class="row between hidden" data-speak-ui style="margin-bottom:10px">
+            <button type="button" class="btn secondary" data-speak-all>🔊 Læs reglen op</button>
+            <a class="small" href="/profiler/rediger#oplaesning">Stemme og tempo</a>
+        </div>
+        <div class="tip hidden" data-speak-note></div>
+        <p style="font-size:1.12rem" data-speak="@speech[0].Text">@Model.Intro</p>
+        @for (var i = 0; i < Model.Sections.Count; i++)
         {
-            <div class="rule-section">
-                <h3>@s.Heading</h3>
+            var s = Model.Sections[i];
+            <div class="rule-section" data-speak="@speech[i + 1].Text">
+                <h3 class="row between">@s.Heading <button type="button" class="speak-one hidden" data-speak-ui data-speak-one title="Læs dette afsnit op">🔊</button></h3>
                 <p>@s.Text</p>
                 @if (s.Example is { Count: > 0 } ex)
                 {
@@ -35,7 +42,7 @@
                 @if (s.Tip is not null) { <div class="tip">💡 @s.Tip</div> }
             </div>
         }
-        <div class="remember">🦊 Husk: @Model.Remember</div>
+        <div class="remember" data-speak="@speech[^1].Text">🦊 Husk: @Model.Remember</div>
     </div>
     <div class="stack">
         <div class="card soft">
@@ -56,3 +63,7 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+<script>rrSpeech.rulePage(document.querySelector('[data-rule-speech]'));</script>
+}

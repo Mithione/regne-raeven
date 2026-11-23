@@ -169,6 +169,18 @@ public class ProfilesController(AppDb db, CurrentProfile current) : Controller
         return Redirect("/profiler/rediger#dage");
     }
 
+    /// <summary>Read-aloud settings: voice (kvinde/mand) and speed (rolig/normal).</summary>
+    [HttpPost("oplaesning")]
+    public async Task<IActionResult> SaveSpeech(string? voice, string? rate)
+    {
+        var p = await current.RequireAsync();
+        p.Voice = voice == "mand" ? "mand" : "kvinde";
+        p.SpeechRate = rate == "normal" ? "normal" : "rolig";
+        await db.SaveChangesAsync();
+        TempData["Info"] = "Oplæsningen er gemt.";
+        return Redirect("/profiler/rediger#oplaesning");
+    }
+
     [HttpPost("slet")]
     public async Task<IActionResult> Delete(string? confirmName)
     {

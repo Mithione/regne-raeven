@@ -14,6 +14,10 @@ public class Profile
     public string? Background { get; set; }
     public string? Theme { get; set; }
     public string Color { get; set; } = "#f26b1d";
+    /// <summary>Read-aloud voice: "kvinde" or "mand" – the program picks a Danish voice of that kind if one is installed.</summary>
+    public string Voice { get; set; } = "kvinde";
+    /// <summary>Read-aloud speed: "rolig" (a bit slower) or "normal".</summary>
+    public string SpeechRate { get; set; } = "rolig";
     /// <summary>Klassetrin (5 or 6) – decides how hard the daily tasks are.</summary>
     public int Grade { get; set; } = 5;
     public int Xp { get; set; }

@@ -203,6 +203,34 @@
     </details>
 </div>
 
+<div class="card" id="oplaesning" data-voice-settings>
+    <h2>🔊 Oplæsning</h2>
+    <p class="muted small">Under Regneregler kan reglerne læses højt. Vælg stemme og tempo.</p>
+    <form method="post" action="/profiler/oplaesning" class="stack">
+        <div class="row" style="gap:24px">
+            <div>
+                <span class="small" style="font-weight:700;display:block;margin-bottom:6px">Stemme</span>
+                <div class="seg">
+                    <label><input type="radio" name="voice" value="kvinde" checked="@(Model.Voice != "mand")"><span>👩 Kvinde</span></label>
+                    <label><input type="radio" name="voice" value="mand" checked="@(Model.Voice == "mand")"><span>👨 Mand</span></label>
+                </div>
+            </div>
+            <div>
+                <span class="small" style="font-weight:700;display:block;margin-bottom:6px">Tempo</span>
+                <div class="seg">
+                    <label><input type="radio" name="rate" value="rolig" checked="@(Model.SpeechRate != "normal")"><span>🐢 Rolig</span></label>
+                    <label><input type="radio" name="rate" value="normal" checked="@(Model.SpeechRate == "normal")"><span>🐇 Normal</span></label>
+                </div>
+            </div>
+        </div>
+        <div class="small" data-voice-status>Finder stemmer …</div>
+        <div class="row">
+            <button type="button" class="btn secondary" data-voice-test>▶ Prøv stemmen</button>
+            <button type="submit" class="btn">Gem</button>
+        </div>
+    </form>
+</div>
+
 <div class="card" id="titler">
     <h2>🏅 Rævetitler</h2>
     <p class="muted small">En ny titel låses op hvert 5.–10. level. Vælg selv, hvilken titel du vil vise.</p>
@@ -244,3 +272,7 @@
         </form>
     </div>
 </div>
+
+@section Scripts {
+<script>rrSpeech.settings(document.querySelector('[data-voice-settings]'));</script>
+}
