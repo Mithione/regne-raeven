@@ -1,0 +1,22 @@
+﻿{
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "desktop": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "REGNERAEVEN_DATA": "App_Data/dev"
+      }
+    },
+    "browser": {
+      "commandName": "Project",
+      "commandLineArgs": "--browser",
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5187",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "REGNERAEVEN_DATA": "App_Data/dev"
+      }
+    }
+  }
+}

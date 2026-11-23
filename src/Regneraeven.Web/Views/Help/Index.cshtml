@@ -1,0 +1,34 @@
+@model IReadOnlyList<RuleTopic>
+@{
+    ViewData["Title"] = "Regneregler";
+    ViewData["Nav"] = "regler";
+}
+<div class="topbar">
+    <div>
+        <h1>Regneregler</h1>
+        <div class="muted">Vælg et emne og se, hvordan man regner – med eksempler.</div>
+    </div>
+</div>
+
+<div class="card soft">
+    <form method="get" action="/regler/trin" class="row">
+        <div style="flex:1;min-width:240px">
+            <label class="field" for="udtryk">🪜 Trin for trin: skriv et regnestykke, du er i tvivl om</label>
+            <input type="text" id="udtryk" name="udtryk" placeholder="Fx 3/4 + 1/6   eller   4 + 3 · (8 − 2)" autocomplete="off">
+            <div class="field-help">Ræven regner et <b>lignende</b> stykke med andre tal, så du kan se metoden – og selv regne dit eget.</div>
+        </div>
+        <button class="btn" type="submit">Vis mig hvordan</button>
+    </form>
+</div>
+
+<div class="grid auto mt">
+    @foreach (var r in Model)
+    {
+        var t = r.Info;
+        <a class="tile" href="/regler/@t.Slug" style="--c:@t.Color">
+            <span class="sym">@t.Icon</span>
+            <h3>@t.Name</h3>
+            <p>@t.Description</p>
+        </a>
+    }
+</div>

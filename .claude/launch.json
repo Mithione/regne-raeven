@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "regneraeven-browser",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": ["run", "--project", "src/Regneraeven.Desktop", "--launch-profile", "browser"],
+      "port": 5187
+    }
+  ]
+}

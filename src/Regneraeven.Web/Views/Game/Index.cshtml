@@ -1,0 +1,111 @@
+@model GameHubModel
+@{
+    ViewData["Title"] = "Regnespil";
+    ViewData["Nav"] = "spil";
+    var p = Model.Profile;
+    var lvl = Leveling.FromXp(p.Xp);
+    var shown = CurrentProfile.ShownTitle(p);
+    var done = Model.Daily.Count(t => t.Status != GameTaskStatus.Open);
+    var dailyXp = Model.Daily.Sum(t => t.XpAwarded);
+    var suggested = Regneraeven.Web.Controllers.GameController.SuggestedDifficulty(p);
+}
+<div class="topbar">
+    <div>
+        <h1>🎮 Regnespil</h1>
+        <div class="muted">Løs opgaver, saml XP og lås nye rævetitler op.</div>
+    </div>
+    <span class="streak">🔥 @Model.Streak @(Model.Streak == 1 ? "dag" : "dage") i træk</span>
+</div>
+
+<div class="split">
+    <div class="stack">
+        <div class="card">
+            <div class="row between">
+                <div>
+                    <h2 style="margin:0">Dagens opgaver</h2>
+                    <div class="muted small">@done af @Model.Daily.Count klaret · @dailyXp XP i dag · bonus når alle er klaret: +@Leveling.DailyBonus(Math.Max(1, Model.Streak + (p.LastDailyDone == DateOnly.FromDateTime(DateTime.Now) ? 0 : 1))) XP</div>
+                </div>
+                @if (done < Model.Daily.Count) { <a class="btn big" href="/spil/naeste">@(done == 0 ? "Start" : "Fortsæt") →</a> }
+                else { <span class="badge green" style="font-size:1rem;padding:8px 14px">✓ Alle klaret – kom igen i morgen!</span> }
+            </div>
+            <div class="mt"><partial name="_DailyStrip" model="(Model.Daily, (int?)null)" /></div>
+        </div>
+
+        <div class="card">
+            <h2>Træning</h2>
+            <p class="muted small">Øv lige det emne, du vil. Træning giver halv XP – dagens opgaver giver fuld XP.</p>
+            <div class="grid auto">
+                @foreach (var t in TopicCatalog.Game)
+                {
+                    Model.SolvedByTopic.TryGetValue(t.Topic, out var solved);
+                    <div class="tile" style="--c:@t.Color">
+                        <span class="sym">@t.Icon</span>
+                        <h3>@t.Name</h3>
+                        <p>@t.Description</p>
+                        <div class="foot">
+                            <span class="badge orange">@Leveling.TrainingXp(Leveling.TaskXp(t.Topic, 1))–@Leveling.TrainingXp(Leveling.TaskXp(t.Topic, 3)) XP</span>
+                            @if (solved > 0) { <span class="badge green">@solved løst</span> }
+                        </div>
+                        <form method="post" action="/spil/traen" class="row" style="gap:6px">
+                            <input type="hidden" name="emne" value="@t.Slug">
+                            @for (var d = 1; d <= 3; d++)
+                            {
+                                <button class="btn @(d == suggested ? "" : "secondary") small" type="submit" name="svaerhed" value="@d" title="@Ui.Difficulty(d)">@Ui.Difficulty(d)</button>
+                            }
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="stack">
+        <div class="card">
+            <div class="level-card">
+                <div class="level-ring" style="--p:@lvl.Percent"><div><span>Level</span><b>@lvl.Level</b></div></div>
+                <div>
+                    <div class="title-name">@shown.Icon @shown.Name</div>
+                    <div class="muted small">@lvl.XpIntoLevel / @lvl.XpForNextLevel XP</div>
+                    <div class="muted small">@p.Xp XP i alt</div>
+                </div>
+            </div>
+        </div>
+        <div class="card" id="titler">
+            <h3>Rævetitler</h3>
+            <p class="muted small">Nye titler låses op hvert 5.–10. level. Vælg selv, hvilken du vil vise.</p>
+            <div class="titles" style="grid-template-columns:1fr 1fr">
+                @foreach (var t in Leveling.Titles)
+                {
+                    var unlocked = t.Level <= lvl.Level;
+                    <div class="t @(unlocked ? "" : "locked-t") @(t.Level == shown.Level ? "shown" : "")" title="@t.Description">
+                        <div class="i">@(unlocked ? t.Icon : "🔒")</div>
+                        <b>@t.Name</b>
+                        <span class="muted small">Level @t.Level</span>
+                        @if (unlocked && t.Level != shown.Level)
+                        {
+                            <form method="post" action="/profiler/titel"><input type="hidden" name="level" value="@t.Level"><button class="btn ghost small" type="submit">Vis</button></form>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+        @if (Model.RecentXp.Count > 0)
+        {
+            <div class="card">
+                <h3>Seneste XP</h3>
+                <ul class="xp-list">
+                    @foreach (var x in Model.RecentXp) { <li><span>@x.Reason</span><b>+@x.Amount</b></li> }
+                </ul>
+            </div>
+        }
+        <div class="card soft small">
+            <b>Sådan får du XP</b>
+            <ul style="padding-left:18px;margin:6px 0 0">
+                <li>Plus og minus: lidt XP. Brøker, decimaltal, geometri og koordinater: meget XP.</li>
+                <li>Svære opgaver giver dobbelt så meget som lette.</li>
+                <li>Rigtigt i første forsøg: fuld XP. Andet forsøg: halv XP.</li>
+                <li>Klar alle dagens opgaver: bonus – større jo flere dage i træk.</li>
+            </ul>
+        </div>
+    </div>
+</div>

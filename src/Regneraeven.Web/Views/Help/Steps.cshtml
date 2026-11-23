@@ -1,0 +1,64 @@
+@model StepsModel
+@{
+    ViewData["Title"] = "Trin for trin";
+    ViewData["Nav"] = "regler";
+}
+<div class="crumbs"><a href="/regler">Regneregler</a> ›</div>
+<div class="topbar"><h1>🪜 Trin for trin</h1></div>
+
+<div class="card soft">
+    <form method="get" action="/regler/trin" class="row">
+        <div style="flex:1;min-width:240px">
+            <label class="field" for="udtryk">Dit regnestykke</label>
+            <input type="text" id="udtryk" name="udtryk" value="@Model.Input" placeholder="Fx 2/3 + 1/4   eller   48 : (2 + 4) · 2" autocomplete="off" autofocus>
+            <div class="field-help">Du kan bruge + − · : / og parenteser. Decimaltal skrives med komma (2,5). Brøker med skråstreg (3/4).</div>
+        </div>
+        <button class="btn" type="submit">Vis mig hvordan</button>
+    </form>
+</div>
+
+@if (Model.Error is not null)
+{
+    <div class="alert warn mt">@Model.Error</div>
+}
+@if (Model.Similar is { } s)
+{
+    <div class="card mt">
+        <div class="row between">
+            <div>
+                <div class="muted small">Et lignende regnestykke – med andre tal end dit</div>
+                <div class="task-display" style="text-align:left;padding:8px 0;font-size:2rem">@s.Input</div>
+            </div>
+            <a class="btn secondary small" href="/regler/trin?udtryk=@Uri.EscapeDataString(Model.Input ?? "")">🎲 Et andet eksempel</a>
+        </div>
+        <ol class="steps">
+            @foreach (var step in s.Steps)
+            {
+                <li>@step.Explanation<span class="expr">= @step.Expression</span></li>
+            }
+        </ol>
+        <div class="result-line">Resultat: @s.ResultText</div>
+        <div class="tip mt">💡 Brug de samme trin på dit eget regnestykke: <b>@Model.Input</b>. Når du har et svar, kan du gemme opgaven og tjekke den under <a href="/opgaver/ny?tekst=@Uri.EscapeDataString(Model.Input ?? "")">Mine opgaver</a>.</div>
+    </div>
+    @if (Model.Topics is { Count: > 0 } topics)
+    {
+        <div class="card mt">
+            <h3>Læs mere om reglerne</h3>
+            <div class="chips">
+                @foreach (var t in topics.Where(t => RuleBook.For(t) is not null)) { @Ui.Chip(t.Info(), "/regler/" + t.Info().Slug) }
+            </div>
+        </div>
+    }
+}
+else if (Model.Error is null)
+{
+    <div class="card mt">
+        <h3>Prøv fx</h3>
+        <div class="chips">
+            @foreach (var ex in new[] { "4 + 3 · 5", "(12 − 4) · 3", "3/4 + 1/6", "2/3 · 3/4", "2,5 · 1,4", "7 − 12", "432 : 6" })
+            {
+                <a class="chip" href="/regler/trin?udtryk=@Uri.EscapeDataString(ex)">@ex</a>
+            }
+        </div>
+    </div>
+}

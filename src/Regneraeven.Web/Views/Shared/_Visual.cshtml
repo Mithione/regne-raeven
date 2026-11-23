@@ -1,0 +1,106 @@
+@model Visual
+@using System.Globalization
+@{
+    string N(double v) => v.ToString("0.##", CultureInfo.InvariantCulture);
+    string L(int i) => i < Model.Labels.Length ? Model.Labels[i] : "";
+    // Razor treats <text> inside code blocks as its own tag, so SVG text in loops is written here.
+    Microsoft.AspNetCore.Html.IHtmlContent T(double x, double y, string cls, object content, string anchor = "start") =>
+        new Microsoft.AspNetCore.Html.HtmlString($"<text class=\"{cls}\" x=\"{N(x)}\" y=\"{N(y)}\" text-anchor=\"{anchor}\">{System.Net.WebUtility.HtmlEncode(content.ToString())}</text>");
+}
+<div class="visual">
+@switch (Model.Kind)
+{
+    case "rect":
+    {
+        // Scale the rectangle into a 300×190 box (squares stay square).
+        double w = Model.Values[0], h = Model.Values[1];
+        var s = Math.Min(280 / w, 170 / h);
+        double pw = w * s, ph = h * s, x0 = 60, y0 = 20;
+        <svg width="@N(pw + 130)" height="@N(ph + 70)" viewBox="0 0 @N(pw + 130) @N(ph + 70)" aria-label="Rektangel">
+            <rect x="@N(x0)" y="@N(y0)" width="@N(pw)" height="@N(ph)" rx="3" fill="#fff1e6" stroke="#f26b1d" stroke-width="3" />
+            <text x="@N(x0 + pw / 2)" y="@N(y0 + ph + 30)" text-anchor="middle">@L(0)</text>
+            <text x="@N(x0 + pw + 12)" y="@N(y0 + ph / 2 + 6)">@L(1)</text>
+            <path d="M@(N(x0)) @N(y0 + 14) h14 v-14" fill="none" stroke="#c2410c" stroke-width="1.5" />
+        </svg>
+        break;
+    }
+    case "righttriangle":
+    {
+        double g = Model.Values[0], h = Model.Values[1];
+        var s = Math.Min(280 / g, 180 / h);
+        double pw = g * s, ph = h * s, x0 = 110, y0 = 16;
+        <svg width="@N(pw + 150)" height="@N(ph + 64)" viewBox="0 0 @N(pw + 150) @N(ph + 64)" aria-label="Retvinklet trekant">
+            <path d="M@(N(x0)) @N(y0) L@(N(x0)) @N(y0 + ph) L@(N(x0 + pw)) @N(y0 + ph) Z" fill="#fff1e6" stroke="#f26b1d" stroke-width="3" stroke-linejoin="round" />
+            <path d="M@(N(x0)) @N(y0 + ph - 14) h14 v14" fill="none" stroke="#c2410c" stroke-width="1.5" />
+            <text x="@N(x0 + pw / 2)" y="@N(y0 + ph + 30)" text-anchor="middle">g = @L(0)</text>
+            <text x="@N(x0 - 10)" y="@N(y0 + ph / 2 + 6)" text-anchor="end">h = @L(1)</text>
+        </svg>
+        break;
+    }
+    case "triangle":
+    {
+        <svg width="360" height="230" viewBox="0 0 360 230" aria-label="Trekant">
+            <path d="M40 200 L320 200 L210 30 Z" fill="#fff1e6" stroke="#f26b1d" stroke-width="3" stroke-linejoin="round" />
+            <text x="22" y="220" font-size="18">A</text>
+            <text x="326" y="220" font-size="18">B</text>
+            <text x="204" y="22" font-size="18">C</text>
+            <text x="76" y="192">@L(0)</text>
+            <text x="262" y="192" text-anchor="end">@L(1)</text>
+            <text x="210" y="74" text-anchor="middle" fill="#c2410c">@L(2)</text>
+        </svg>
+        break;
+    }
+    case "lshape":
+    {
+        double w = Model.Values[0], h = Model.Values[1], cw = Model.Values[2], ch = Model.Values[3];
+        var s = Math.Min(280 / w, 190 / h);
+        double x0 = 70, y0 = 20, W = w * s, H = h * s, CW = cw * s, CH = ch * s;
+        <svg width="@N(W + 150)" height="@N(H + 66)" viewBox="0 0 @N(W + 150) @N(H + 66)" aria-label="Sammensat figur">
+            <path d="M@(N(x0)) @N(y0) H@(N(x0 + W - CW)) V@(N(y0 + CH)) H@(N(x0 + W)) V@(N(y0 + H)) H@(N(x0)) Z" fill="#fff1e6" stroke="#f26b1d" stroke-width="3" stroke-linejoin="round" />
+            <path d="M@(N(x0 + W - CW)) @N(y0) H@(N(x0 + W)) V@(N(y0 + CH))" fill="none" stroke="#f6b98d" stroke-width="1.5" stroke-dasharray="5 5" />
+            <text x="@N(x0 + W / 2)" y="@N(y0 + H + 30)" text-anchor="middle">@L(0)</text>
+            <text x="@N(x0 - 10)" y="@N(y0 + H / 2 + 6)" text-anchor="end">@L(1)</text>
+            <text x="@N(x0 + W - CW / 2)" y="@N(y0 + CH + 24)" text-anchor="middle" fill="#c2410c">@L(2)</text>
+            <text x="@N(x0 + W - CW - 8)" y="@N(y0 + CH / 2 + 6)" text-anchor="end" fill="#c2410c">@L(3)</text>
+        </svg>
+        break;
+    }
+    case "grid":
+    {
+        var min = Model.Min; var max = Model.Max;
+        var cell = max - min > 10 ? 30 : 34;
+        var size = (max - min) * cell;
+        var pad = 30;
+        double X(int v) => pad + (v - min) * cell;
+        double Y(int v) => pad + (max - v) * cell;
+        <svg class="grid-svg @(Model.Clickable ? "clickable" : "")" width="@(size + 2 * pad)" height="@(size + 2 * pad)" viewBox="0 0 @(size + 2 * pad) @(size + 2 * pad)"
+             data-min="@min" data-max="@max" data-cell="@cell" data-pad="@pad" aria-label="Koordinatsystem">
+            @for (var v = min; v <= max; v++)
+            {
+                <line class="cell" x1="@N(X(v))" y1="@pad" x2="@N(X(v))" y2="@(pad + size)" />
+                <line class="cell" x1="@pad" y1="@N(Y(v))" x2="@(pad + size)" y2="@N(Y(v))" />
+            }
+            <line class="axis" x1="@pad" y1="@N(Y(Math.Max(min, 0)))" x2="@(pad + size + 8)" y2="@N(Y(Math.Max(min, 0)))" />
+            <line class="axis" x1="@N(X(Math.Max(min, 0)))" y1="@(pad + size)" x2="@N(X(Math.Max(min, 0)))" y2="@(pad - 8)" />
+            <text x="@(pad + size + 10)" y="@N(Y(Math.Max(min, 0)) + 5)" font-size="14">x</text>
+            <text x="@N(X(Math.Max(min, 0)) - 4)" y="@(pad - 12)" font-size="14">y</text>
+            @for (var v = min; v <= max; v++)
+            {
+                if (v == 0 && min < 0) { continue; }
+                @T(X(v), Y(Math.Max(min, 0)) + 16, "tick", v, "middle")
+                if (v != 0)
+                {
+                    @T(X(Math.Max(min, 0)) - 7, Y(v) + 4, "tick", v, "end")
+                }
+            }
+            @if (min < 0) { @T(X(0) - 7, Y(0) + 16, "tick", 0, "end") }
+            @foreach (var p in Model.Points)
+            {
+                <circle class="pt" cx="@N(X(p.X))" cy="@N(Y(p.Y))" r="7" />
+                @T(X(p.X) + 10, Y(p.Y) - 9, "pt-label", p.Name)
+            }
+        </svg>
+        break;
+    }
+}
+</div>

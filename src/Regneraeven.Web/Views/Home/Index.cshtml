@@ -1,0 +1,91 @@
+@model HomeModel
+@{
+    ViewData["Title"] = "Hjem";
+    ViewData["Nav"] = "home";
+    var p = Model.Profile;
+    var lvl = Leveling.FromXp(p.Xp);
+    var title = CurrentProfile.ShownTitle(p);
+    var done = Model.Daily.Count(t => t.Status != GameTaskStatus.Open);
+    var hour = DateTime.Now.Hour;
+    var greeting = hour < 10 ? "Godmorgen" : hour < 18 ? "Hej" : "Godaften";
+}
+<div class="topbar">
+    <div>
+        <h1>@greeting, @p.Name! @p.Avatar</h1>
+        <div class="muted">Hvad skal vi regne i dag?</div>
+    </div>
+    @if (Model.Streak > 0) { <span class="streak">🔥 @Model.Streak @(Model.Streak == 1 ? "dag" : "dage i træk")</span> }
+</div>
+
+<div class="grid two">
+    <div class="card">
+        <div class="level-card">
+            <div class="level-ring" style="--p:@lvl.Percent"><div><span>Level</span><b>@lvl.Level</b></div></div>
+            <div style="flex:1">
+                <div class="title-name">@title.Icon @title.Name</div>
+                <div class="muted small">@lvl.XpIntoLevel / @lvl.XpForNextLevel XP til level @(lvl.Level + 1)</div>
+                <div class="xpbar mt" style="margin-top:8px"><i style="width:@lvl.Percent%"></i></div>
+                @if (lvl.NextTitle is { } next)
+                {
+                    <div class="small muted" style="margin-top:8px">Næste titel: <b>@next.Icon @next.Name</b> på level @next.Level</div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="grid three">
+            <div class="stat"><b>@p.Xp</b><span>XP i alt</span></div>
+            <div class="stat"><b>@Model.XpThisWeek</b><span>XP denne uge</span></div>
+            <div class="stat"><b>@done/@Model.Daily.Count</b><span>Dagens opgaver</span></div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt">
+    <div class="row between">
+        <div>
+            <h2 style="margin:0">Dagens opgaver</h2>
+            <div class="muted small">Klar alle @Model.Daily.Count og få en bonus. Svære emner giver mest XP.</div>
+        </div>
+        @if (done < Model.Daily.Count)
+        {
+            <a class="btn big" href="/spil/naeste">@(done == 0 ? "Start dagens opgaver" : "Fortsæt") →</a>
+        }
+        else
+        {
+            <span class="badge green" style="font-size:1rem;padding:8px 14px">✓ Klaret i dag!</span>
+        }
+    </div>
+    <div class="mt"><partial name="_DailyStrip" model="(Model.Daily, (int?)null)" /></div>
+</div>
+
+<div class="grid four mt">
+    <a class="tile" href="/regler" style="--c:#2563eb">
+        <span class="sym">📘</span><h3>Regneregler</h3><p>Sådan regner du – med eksempler.</p>
+    </a>
+    <a class="tile" href="/regler/trin" style="--c:#7a5af8">
+        <span class="sym">🪜</span><h3>Trin for trin</h3><p>Se et lignende stykke regnet ud.</p>
+    </a>
+    <a class="tile" href="/tabeller" style="--c:#0e9384">
+        <span class="sym">🔢</span><h3>Tabeller</h3><p>Gangetabel, brøker, enheder.</p>
+    </a>
+    <a class="tile" href="/opgaver/ny" style="--c:#f26b1d">
+        <span class="sym">＋</span><h3>Gem en opgave</h3><p>Skriv en opgave fra bogen eller lektierne.</p>
+    </a>
+</div>
+
+@if (Model.RecentProblems.Count > 0)
+{
+    <div class="row between mt-lg"><h2 style="margin:0">Dine seneste opgaver</h2><a href="/opgaver">Se alle →</a></div>
+    <div class="problem-list mt">
+        @foreach (var pr in Model.RecentProblems)
+        {
+            <a class="problem-item" href="/opgaver/@pr.Id">
+                <span class="txt">@pr.Text</span>
+                <span>@Ui.Status(pr.Status)</span>
+                <span class="chips">@foreach (var t in pr.Tags) { @Ui.Tag(t.Name) }</span>
+                <span class="muted small">@Ui.When(pr.UpdatedAt)</span>
+            </a>
+        }
+    </div>
+}

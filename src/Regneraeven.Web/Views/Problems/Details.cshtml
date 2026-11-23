@@ -1,0 +1,113 @@
+@model ProblemDetailsModel
+@{
+    var p = Model.Problem;
+    ViewData["Title"] = "Opgave";
+    ViewData["Nav"] = "opgaver";
+    var hasAnswer = p.Status != ProblemStatus.Open && !string.IsNullOrWhiteSpace(p.MyAnswer);
+    var rules = p.Tags.Select(t => t.Topic).Where(t => t is not null && RuleBook.For(t.Topic) is not null).ToList();
+}
+<div class="crumbs"><a href="/opgaver">Mine opgaver</a> ›</div>
+<div class="topbar">
+    <div class="row">@Ui.Status(p.Status) <span class="muted small">Gemt @Ui.When(p.CreatedAt)</span></div>
+    <div class="row">
+        <a class="btn secondary small" href="/opgaver/@p.Id/rediger">✏️ Ret</a>
+        <form method="post" action="/opgaver/@p.Id/slet" class="inline" onsubmit="return confirm('Slet opgaven?')">
+            <button class="btn danger small" type="submit">Slet</button>
+        </form>
+    </div>
+</div>
+
+<div class="split">
+    <div class="stack">
+        <div class="card">
+            <div class="problem-text">@p.Text</div>
+            <div class="chips mt">@foreach (var t in p.Tags) { @Ui.Tag(t.Name, "/opgaver?tag=" + Uri.EscapeDataString(t.Name)) }</div>
+            @if (!string.IsNullOrWhiteSpace(p.Note)) { <p class="muted mt" style="white-space:pre-line">📝 @p.Note</p> }
+        </div>
+
+        <div class="card" id="svar">
+            <h2>1. Dit svar</h2>
+            <form method="post" action="/opgaver/@p.Id/svar" class="answer-row">
+                <input type="text" name="myAnswer" value="@p.MyAnswer" placeholder="Dit svar" autocomplete="off" required maxlength="200">
+                <button class="btn" type="submit">@(hasAnswer ? "Opdatér svar" : "Gem mit svar")</button>
+            </form>
+            <p class="muted small" style="margin-top:8px">Regn opgaven selv først – på papir eller i hovedet. Når du har skrevet dit svar, låser du op for lommeregneren.</p>
+        </div>
+
+        <div class="card" id="tjek">
+            <h2>2. Tjek dit svar</h2>
+            @if (!hasAnswer)
+            {
+                <div class="locked"><span class="lock">🔒</span><span>Lommeregneren og udregningen låses op, når du har skrevet dit eget svar.</span></div>
+            }
+            else
+            {
+                <div class="calc-wrap">
+                    <partial name="_Calculator" />
+                    <div class="stack">
+                        <div>
+                            <div class="muted small">Dit svar</div>
+                            <div style="font-size:1.6rem;font-weight:800">@p.MyAnswer</div>
+                        </div>
+                        @if (Model.IsExpression)
+                        {
+                            <form method="post" action="/opgaver/@p.Id/tjek"><button class="btn green" type="submit">✓ Tjek mit svar automatisk</button></form>
+                            <a class="btn secondary" href="/opgaver/@p.Id?udregning=true#udregning">🪜 Vis udregningen trin for trin</a>
+                        }
+                        else
+                        {
+                            <p class="muted small">Brug lommeregneren til at tjekke. Hvad fik du?</p>
+                        }
+                        <div class="row">
+                            <form method="post" action="/opgaver/@p.Id/status" class="inline"><input type="hidden" name="status" value="rigtig"><button class="btn secondary small" type="submit">👍 Mit svar var rigtigt</button></form>
+                            <form method="post" action="/opgaver/@p.Id/status" class="inline"><input type="hidden" name="status" value="forkert"><button class="btn secondary small" type="submit">🔁 Jeg skal prøve igen</button></form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @if (Model.Solved is { } s)
+        {
+            <div class="card" id="udregning">
+                <h2>Udregningen</h2>
+                <div class="task-display" style="text-align:left;padding:4px 0;font-size:1.7rem">@s.Input</div>
+                <ol class="steps">
+                    @foreach (var step in s.Steps) { <li>@step.Explanation<span class="expr">= @step.Expression</span></li> }
+                </ol>
+                <div class="result-line">Resultat: @s.ResultText</div>
+            </div>
+        }
+        else if (Model.SolveError is not null)
+        {
+            <div class="alert warn">@Model.SolveError</div>
+        }
+    </div>
+
+    <div class="stack">
+        <div class="card soft">
+            <h3>Brug for hjælp?</h3>
+            @if (Model.IsExpression)
+            {
+                <p class="small">Se et lignende regnestykke regnet ud trin for trin – med andre tal.</p>
+                <a class="btn small" href="/regler/trin?udtryk=@Uri.EscapeDataString(p.Text)">🪜 Vis et lignende eksempel</a>
+            }
+            else
+            {
+                <p class="small">Læs opgaven to gange, find tallene, og vælg regneart.</p>
+                <a class="btn small" href="/regler/tekststykke">Sådan løser du tekststykker</a>
+            }
+        </div>
+        @if (rules.Count > 0)
+        {
+            <div class="card">
+                <h3>Regneregler</h3>
+                <div class="chips">@foreach (var t in rules) { @Ui.Chip(t!, "/regler/" + t!.Slug) }</div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+@if (hasAnswer) { <script>rr.calculator(document.querySelector('[data-calc]'));</script> }
+}

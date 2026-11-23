@@ -1,0 +1,71 @@
+@model ProblemListModel
+@{
+    ViewData["Title"] = "Mine opgaver";
+    ViewData["Nav"] = "opgaver";
+    string Url(string? tag = null, string? status = null, bool clearTag = false)
+    {
+        var parts = new List<string>();
+        if (!string.IsNullOrWhiteSpace(Model.Query)) parts.Add("q=" + Uri.EscapeDataString(Model.Query));
+        var t = clearTag ? null : tag ?? Model.Tag;
+        if (!string.IsNullOrWhiteSpace(t)) parts.Add("tag=" + Uri.EscapeDataString(t));
+        var s = status ?? Model.Status;
+        if (!string.IsNullOrWhiteSpace(s) && s != "alle") parts.Add("status=" + s);
+        return "/opgaver" + (parts.Count > 0 ? "?" + string.Join("&", parts) : "");
+    }
+}
+<div class="topbar">
+    <div>
+        <h1>Mine opgaver</h1>
+        <div class="muted">Gem opgaver fra bogen eller lektierne. Tag dem, så du kan finde dem igen.</div>
+    </div>
+    <a class="btn big" href="/opgaver/ny">＋ Gem en opgave</a>
+</div>
+
+@if (Model.Total == 0)
+{
+    <div class="card empty">
+        <div class="big">📒</div>
+        <h2>Ingen opgaver endnu</h2>
+        <p>Skriv en opgave, du arbejder med. Regn den selv – og tjek så dit svar med lommeregneren.</p>
+        <a class="btn" href="/opgaver/ny">Gem din første opgave</a>
+    </div>
+}
+else
+{
+    <div class="card">
+        <form method="get" action="/opgaver" class="filters">
+            <input type="search" name="q" value="@Model.Query" placeholder="Søg i opgaver …">
+            @if (!string.IsNullOrEmpty(Model.Tag)) { <input type="hidden" name="tag" value="@Model.Tag"> }
+            <select name="status" onchange="this.form.submit()" style="max-width:190px">
+                <option value="alle" selected="@(Model.Status is null or "alle")">Alle</option>
+                <option value="aabne" selected="@(Model.Status == "aabne")">Ikke regnet</option>
+                <option value="rigtige" selected="@(Model.Status == "rigtige")">Rigtige</option>
+                <option value="forkerte" selected="@(Model.Status == "forkerte")">Prøv igen</option>
+            </select>
+            <button class="btn secondary" type="submit">Søg</button>
+        </form>
+        @if (Model.Tags.Count > 0)
+        {
+            <div class="chips mt">
+                <a class="chip @(Model.Tag is null ? "on" : "")" href="@Url(clearTag: true)">Alle tags</a>
+                @foreach (var t in Model.Tags) { @Ui.Tag(t.Name, Url(tag: t.Name), Model.Tag == t.Name, t.Count) }
+            </div>
+        }
+    </div>
+
+    <div class="problem-list mt">
+        @if (Model.Problems.Count == 0)
+        {
+            <div class="card empty"><p>Ingen opgaver passer til din søgning.</p><a href="/opgaver">Vis alle</a></div>
+        }
+        @foreach (var p in Model.Problems)
+        {
+            <a class="problem-item" href="/opgaver/@p.Id">
+                <span class="txt">@p.Text</span>
+                <span>@Ui.Status(p.Status)</span>
+                <span class="chips">@foreach (var t in p.Tags) { @Ui.Tag(t.Name) }</span>
+                <span class="muted small nowrap">@Ui.When(p.UpdatedAt)</span>
+            </a>
+        }
+    </div>
+}

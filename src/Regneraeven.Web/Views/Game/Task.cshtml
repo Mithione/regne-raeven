@@ -1,0 +1,90 @@
+@model GameTaskModel
+@{
+    var t = Model.Task;
+    var e = Model.Entity;
+    var info = t.Topic.Info();
+    ViewData["Title"] = info.Name;
+    ViewData["Nav"] = "spil";
+    var finished = e.Status != GameTaskStatus.Open;
+    var index = Model.Daily?.FindIndex(d => d.Id == e.Id) ?? -1;
+}
+<div class="crumbs"><a href="/spil">Regnespil</a> › @(e.IsDaily ? $"Dagens opgave {index + 1} af {Model.Daily!.Count}" : "Træning")</div>
+
+@if (Model.Daily is not null)
+{
+    <div style="max-width:760px;margin-bottom:16px"><partial name="_DailyStrip" model="(Model.Daily, (int?)e.Id)" /></div>
+}
+
+<div class="card task-card" data-task="@e.Id" data-kind="@t.Kind" data-daily="@(e.IsDaily ? "1" : "0")">
+    <div class="row between">
+        <div class="row">@Ui.Chip(info) <span class="muted small" title="Sværhedsgrad">@Ui.Stars(t.Difficulty) @Ui.Difficulty(t.Difficulty)</span></div>
+        <span class="badge orange" data-xp-badge>@(finished ? $"+{e.XpAwarded} XP" : e.Attempts > 0 ? $"{Leveling.XpForAttempt(Model.FullXp, 2)} XP" : $"{Model.FullXp} XP")</span>
+    </div>
+
+    <div class="task-prompt mt">@t.Prompt</div>
+    @if (t.Display is not null) { <div class="task-display">@t.Display</div> }
+    @if (t.Visual is not null) { <partial name="_Visual" model="t.Visual" /> }
+
+    <form data-answer-form class="@(finished ? "hidden" : "")" autocomplete="off">
+        @if (t.Kind == AnswerKind.Point)
+        {
+            <div class="answer-row">
+                <span class="xy">( <input type="text" name="x" inputmode="numeric" placeholder="x" aria-label="x"> , <input type="text" name="y" inputmode="numeric" placeholder="y" aria-label="y"> )</span>
+                <button class="btn big" type="submit">Tjek</button>
+            </div>
+            @if (t.Visual?.Clickable == true) { <div class="muted small" style="margin-top:6px">Klik i koordinatsystemet – eller skriv tallene.</div> }
+        }
+        else
+        {
+            <div class="answer-row">
+                <input type="text" name="answer" placeholder="Dit svar" aria-label="Dit svar" autofocus>
+                @if (t.Unit is not null) { <span class="unit">@t.Unit</span> }
+                <button class="btn big" type="submit">Tjek</button>
+            </div>
+            <div class="muted small" style="margin-top:6px">
+                @(t.Kind switch
+                {
+                    AnswerKind.Fraction => "Skriv brøker med skråstreg: 3/4. Blandede tal: 1 1/2.",
+                    AnswerKind.ReducedFraction => "Skriv den forkortede brøk, fx 2/3.",
+                    _ => "Decimaltal skrives med komma, fx 2,5.",
+                })
+            </div>
+        }
+    </form>
+
+    <div data-feedback></div>
+
+    <div class="row mt @(finished ? "hidden" : "")" data-help-row>
+        <button type="button" class="btn ghost small" data-hint-btn>💡 Hint</button>
+        <button type="button" class="btn ghost small" data-giveup>🏳️ Vis løsningen (0 XP)</button>
+    </div>
+    <div class="hint hidden" data-hint>💡 @t.Hint</div>
+
+    <div data-solution class="@(finished ? "" : "hidden")">
+        @if (finished)
+        {
+            <div class="feedback @(e.Status == GameTaskStatus.Solved ? "ok" : "tip")">
+                @(e.Status == GameTaskStatus.Solved ? $"Løst! Du svarede {e.LastAnswer}." : $"Svaret er {t.AnswerText}.")
+            </div>
+            <h3 class="mt">Sådan regner du den</h3>
+            <ol class="steps">@foreach (var s in t.Solution) { <li>@s</li> }</ol>
+        }
+    </div>
+
+    <div class="row mt @(finished ? "" : "hidden")" data-next-row>
+        @if (e.IsDaily) { <a class="btn big" href="/spil/naeste">Næste opgave →</a> }
+        else
+        {
+            <form method="post" action="/spil/traen" class="inline">
+                <input type="hidden" name="emne" value="@info.Slug"><input type="hidden" name="svaerhed" value="@t.Difficulty">
+                <button class="btn big" type="submit">En til! →</button>
+            </form>
+        }
+        <a class="btn secondary" href="/spil">Til oversigten</a>
+        @if (RuleBook.For(t.Topic) is not null) { <a class="btn ghost" href="/regler/@info.Slug">📘 Regler for @info.Name.ToLowerInvariant()</a> }
+    </div>
+</div>
+
+@section Scripts {
+<script>rr.gameTask(document.querySelector('[data-task]'));</script>
+}

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Regneræven">
+  <!-- ears -->
+  <path d="M10 6 L26 20 L12 28 Z" fill="#e8590c"/>
+  <path d="M54 6 L38 20 L52 28 Z" fill="#e8590c"/>
+  <path d="M13 12 L22 20 L15 24 Z" fill="#3b1d0e"/>
+  <path d="M51 12 L42 20 L49 24 Z" fill="#3b1d0e"/>
+  <!-- head -->
+  <path d="M8 26 Q10 16 32 16 Q54 16 56 26 L50 42 Q44 54 32 58 Q20 54 14 42 Z" fill="#f26b1d"/>
+  <!-- white cheeks -->
+  <path d="M8 26 Q14 40 32 44 Q24 52 32 58 Q20 54 14 42 Z" fill="#fff4e8"/>
+  <path d="M56 26 Q50 40 32 44 Q40 52 32 58 Q44 54 50 42 Z" fill="#fff4e8"/>
+  <!-- eyes -->
+  <ellipse cx="23" cy="32" rx="3.2" ry="4" fill="#1f2937"/>
+  <ellipse cx="41" cy="32" rx="3.2" ry="4" fill="#1f2937"/>
+  <circle cx="24.2" cy="30.6" r="1.1" fill="#fff"/>
+  <circle cx="42.2" cy="30.6" r="1.1" fill="#fff"/>
+  <!-- nose -->
+  <path d="M28 50 Q32 47 36 50 Q34 54 32 54 Q30 54 28 50 Z" fill="#1f2937"/>
+  <!-- tiny plus on forehead -->
+  <path d="M30.5 21 h3 v2.5 h2.5 v3 h-2.5 v2.5 h-3 v-2.5 h-2.5 v-3 h2.5 Z" fill="#fff4e8" opacity=".9"/>
+</svg>

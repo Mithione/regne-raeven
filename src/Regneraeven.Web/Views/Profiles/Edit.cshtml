@@ -1,0 +1,34 @@
+@model Profile
+@{
+    ViewData["Title"] = "Din profil";
+    var lvl = Leveling.FromXp(Model.Xp);
+}
+<div class="topbar"><h1>Din profil</h1></div>
+<div class="grid two">
+    <div class="card">
+        <form method="post" action="/profiler/rediger">
+            <partial name="_ProfileFields" model="Model" />
+            <div class="mt"><button class="btn" type="submit">Gem</button></div>
+        </form>
+    </div>
+    <div>
+        <div class="card">
+            <div class="level-card">
+                <div class="level-ring" style="--p:@lvl.Percent"><div><span>Level</span><b>@lvl.Level</b></div></div>
+                <div>
+                    <div class="title-name">@CurrentProfile.ShownTitle(Model).Icon @CurrentProfile.ShownTitle(Model).Name</div>
+                    <div class="muted">@Model.Xp XP i alt</div>
+                    <a href="/spil#titler">Se alle titler →</a>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <h3>Slet profil</h3>
+            <p class="muted small">Sletter @Model.Name med alle gemte opgaver og XP. Det kan ikke fortrydes.</p>
+            <form method="post" action="/profiler/slet" class="row">
+                <input type="text" name="confirmName" placeholder="Skriv »@Model.Name« for at bekræfte" style="max-width:260px" autocomplete="off">
+                <button class="btn danger" type="submit">Slet profil</button>
+            </form>
+        </div>
+    </div>
+</div>

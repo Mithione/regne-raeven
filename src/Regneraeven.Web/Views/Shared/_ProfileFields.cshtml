@@ -1,0 +1,38 @@
+@model Profile?
+@{
+    var avatar = Model?.Avatar ?? Regneraeven.Web.Controllers.ProfilesController.Avatars[0];
+    var color = Model?.Color ?? Regneraeven.Web.Controllers.ProfilesController.Colors[0];
+    var grade = Model?.Grade ?? 5;
+}
+<div class="stack">
+    <div>
+        <label class="field" for="Name">Navn</label>
+        <input type="text" id="Name" name="Name" value="@Model?.Name" maxlength="40" required autocomplete="off" placeholder="Fx Ida">
+    </div>
+    <div>
+        <span class="field" style="display:block;font-weight:700;margin-bottom:6px">Vælg dit dyr</span>
+        <div class="avatar-pick">
+            @foreach (var a in Regneraeven.Web.Controllers.ProfilesController.Avatars)
+            {
+                <label><input type="radio" name="Avatar" value="@a" checked="@(a == avatar)"><span>@a</span></label>
+            }
+        </div>
+    </div>
+    <div>
+        <span class="field" style="display:block;font-weight:700;margin-bottom:6px">Farve</span>
+        <div class="color-pick">
+            @foreach (var c in Regneraeven.Web.Controllers.ProfilesController.Colors)
+            {
+                <label><input type="radio" name="Color" value="@c" checked="@(c == color)"><span style="background:@c"></span></label>
+            }
+        </div>
+    </div>
+    <div>
+        <span class="field" style="display:block;font-weight:700;margin-bottom:6px">Klasse</span>
+        <div class="seg">
+            <label><input type="radio" name="Grade" value="5" checked="@(grade == 5)"><span>5. klasse</span></label>
+            <label><input type="radio" name="Grade" value="6" checked="@(grade == 6)"><span>6. klasse</span></label>
+        </div>
+        <div class="field-help">Bestemmer hvor svære dagens opgaver er.</div>
+    </div>
+</div>

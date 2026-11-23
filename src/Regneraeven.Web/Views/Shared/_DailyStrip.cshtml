@@ -1,0 +1,14 @@
+@model (List<GameTask> Tasks, int? Current)
+<div class="daily">
+    @foreach (var t in Model.Tasks)
+    {
+        var info = t.Topic.Info();
+        var cls = t.Status switch { GameTaskStatus.Solved => "solved", GameTaskStatus.Revealed => "revealed", _ => "" };
+        if (t.Id == Model.Current) { cls += " current"; }
+        <a class="@cls" href="/spil/opgave/@t.Id" style="--c:@info.Color" title="@info.Name – @Ui.Difficulty(t.Difficulty)">
+            <span class="sym">@(t.Status == GameTaskStatus.Solved ? "✓" : info.Icon)</span>
+            <span class="lbl">@info.Short</span>
+            <span class="xp">@(t.Status == GameTaskStatus.Solved ? $"+{t.XpAwarded} XP" : t.Status == GameTaskStatus.Revealed ? "0 XP" : $"{GameService.FullXp(t)} XP")</span>
+        </a>
+    }
+</div>

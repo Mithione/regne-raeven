@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <!--
+    The whole app UI (controllers, views, css/js) and data access as a Razor class library.
+    It is hosted by Regneraeven.Desktop today; a future website only needs a small host project
+    that calls AddRegneraeven()/UseRegneraeven() as well.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.34" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Regneraeven.Core\Regneraeven.Core.csproj" />
+  </ItemGroup>
+
+</Project>

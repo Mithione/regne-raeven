@@ -1,0 +1,60 @@
+@{
+    var profile = Context.Items["Profile"] as Profile;
+    var nav = ViewData["Nav"] as string;
+    var title = ViewData["Title"] as string;
+    var level = profile is null ? null : Leveling.FromXp(profile.Xp);
+    string Active(string key) => nav == key ? "active" : "";
+}
+<!doctype html>
+<html lang="da">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@(string.IsNullOrEmpty(title) ? "Regneræven" : title + " – Regneræven")</title>
+    <link rel="icon" href="@Ui.Assets/img/fox.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="@Ui.Assets/css/site.css?v=2">
+    <meta name="rr-token" content="@Xsrf()">
+</head>
+<body>
+@functions {
+    private string Xsrf() =>
+        Context.RequestServices.GetRequiredService<Microsoft.AspNetCore.Antiforgery.IAntiforgery>().GetAndStoreTokens(Context).RequestToken ?? "";
+}
+<div class="app">
+    <aside class="side">
+        <a class="brand" href="/">
+            <img src="@Ui.Assets/img/fox.svg" alt="">
+            <div><b>Regneræven</b><small>Din snu regnemakker</small></div>
+        </a>
+        @if (profile is not null)
+        {
+            <nav class="nav">
+                <a class="@Active("home")" href="/"><span class="ico">🏠</span>Hjem</a>
+                <a class="@Active("spil")" href="/spil"><span class="ico">🎮</span>Regnespil</a>
+                <a class="@Active("opgaver")" href="/opgaver"><span class="ico">📒</span>Mine opgaver</a>
+                <a class="@Active("regler")" href="/regler"><span class="ico">📘</span>Regneregler</a>
+                <a class="@Active("tabeller")" href="/tabeller"><span class="ico">🔢</span>Tabeller</a>
+            </nav>
+            <div class="spacer"></div>
+            <a class="side-profile" href="/profiler/rediger" title="Din profil">
+                <span class="avatar" style="border-color:@profile.Color">@profile.Avatar</span>
+                <span class="who">
+                    <b>@profile.Name</b>
+                    <span>Level @level!.Level · @CurrentProfile.ShownTitle(profile).Name</span>
+                    <span class="xpbar sm" style="display:block;margin-top:5px;width:120px"><i style="width:@level.Percent%"></i></span>
+                </span>
+            </a>
+            <form method="post" action="/profiler/skift" class="center"><button class="btn ghost small" type="submit">Skift person</button></form>
+        }
+    </aside>
+    <main class="main">
+        @if (TempData["Error"] is string err) { <div class="alert error">@err</div> }
+        @if (TempData["Warn"] is string warn) { <div class="alert warn">@warn</div> }
+        @if (TempData["Info"] is string info) { <div class="alert info">@info</div> }
+        @RenderBody()
+    </main>
+</div>
+<script src="@Ui.Assets/js/site.js?v=2"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

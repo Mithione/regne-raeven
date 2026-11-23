@@ -1,0 +1,21 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+.vscode/
+*.swp
+
+## Local dev data (KREATIV_PORTAL_DATA)
+**/App_Data/
+
+## Secrets
+appsettings.*.local.json
+*.pfx
+.claude/settings.local.json
+.env
+
+## Publish output
+publish/
+*.zip

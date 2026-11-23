@@ -1,0 +1,113 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Regneraeven.Core.Progress;
+using Regneraeven.Web.Data;
+using Regneraeven.Web.Models;
+using Regneraeven.Web.Services;
+
+namespace Regneraeven.Web.Controllers;
+
+public class HomeController(AppDb db, CurrentProfile current, GameService game) : Controller
+{
+    [HttpGet("")]
+    public async Task<IActionResult> Index()
+    {
+        var p = await current.RequireAsync();
+        var daily = await game.GetDailyAsync(p);
+        var problems = await db.Problems.Include(x => x.Tags).Where(x => x.ProfileId == p.Id)
+            .OrderByDescending(x => x.UpdatedAt).Take(4).ToListAsync();
+        return View(new HomeModel(p, daily, problems, await game.XpThisWeekAsync(p), CurrentProfile.LiveStreak(p, game.Today)));
+    }
+
+    [HttpGet("fejl"), AllowWithoutProfile]
+    public IActionResult Error() => View();
+}
+
+[Route("profiler")]
+public class ProfilesController(AppDb db, CurrentProfile current) : Controller
+{
+    public static readonly string[] Avatars = ["🦊", "🐻", "🐼", "🐯", "🦁", "🐸", "🐙", "🦄", "🐲", "🐧", "🦉", "🐬", "🐱", "🐶", "🦖", "🚀"];
+    public static readonly string[] Colors = ["#f26b1d", "#e03e5c", "#7a5af8", "#2563eb", "#0e9384", "#2e9e5b", "#ca8a04", "#475467"];
+
+    [HttpGet(""), AllowWithoutProfile]
+    public async Task<IActionResult> Index()
+    {
+        var profiles = await db.Profiles.OrderBy(p => p.Name).ToListAsync();
+        return View(new ProfilesModel(profiles, await current.GetAsync()));
+    }
+
+    [HttpPost("ny"), AllowWithoutProfile]
+    public async Task<IActionResult> Create(ProfileForm form)
+    {
+        var name = (form.Name ?? "").Trim();
+        if (name.Length == 0) throw new UserFacingException("Skriv et navn.");
+        if (name.Length > 40) name = name[..40];
+        var p = new Profile
+        {
+            Name = name,
+            Avatar = Avatars.Contains(form.Avatar) ? form.Avatar! : Avatars[0],
+            Color = Colors.Contains(form.Color) ? form.Color! : Colors[0],
+            Grade = form.Grade is 5 or 6 ? form.Grade : 5,
+        };
+        db.Profiles.Add(p);
+        await db.SaveChangesAsync();
+        current.Select(p.Id);
+        TempData["Info"] = $"Velkommen, {p.Name}! Du er nu en {Leveling.TitleFor(1).Name}. 🦊";
+        return Redirect("/");
+    }
+
+    [HttpPost("{id:int}/vaelg"), AllowWithoutProfile]
+    public async Task<IActionResult> Choose(int id)
+    {
+        if (!await db.Profiles.AnyAsync(p => p.Id == id)) throw new UserFacingException("Profilen findes ikke.");
+        current.Select(id);
+        return Redirect("/");
+    }
+
+    [HttpGet("rediger")]
+    public async Task<IActionResult> Edit() => View(await current.RequireAsync());
+
+    [HttpPost("rediger")]
+    public async Task<IActionResult> Edit(ProfileForm form)
+    {
+        var p = await current.RequireAsync();
+        var name = (form.Name ?? "").Trim();
+        if (name.Length == 0) throw new UserFacingException("Skriv et navn.");
+        p.Name = name.Length > 40 ? name[..40] : name;
+        if (Avatars.Contains(form.Avatar)) p.Avatar = form.Avatar!;
+        if (Colors.Contains(form.Color)) p.Color = form.Color!;
+        if (form.Grade is 5 or 6) p.Grade = form.Grade;
+        await db.SaveChangesAsync();
+        TempData["Info"] = "Profilen er gemt.";
+        return Redirect("/profiler/rediger");
+    }
+
+    [HttpPost("titel")]
+    public async Task<IActionResult> ChooseTitle(int level)
+    {
+        var p = await current.RequireAsync();
+        var info = Leveling.FromXp(p.Xp);
+        p.ShownTitleLevel = Leveling.Titles.Any(t => t.Level == level) && level <= info.Level ? level : null;
+        await db.SaveChangesAsync();
+        return Redirect("/spil#titler");
+    }
+
+    [HttpPost("slet")]
+    public async Task<IActionResult> Delete(string? confirmName)
+    {
+        var p = await current.RequireAsync();
+        if (!string.Equals(confirmName?.Trim(), p.Name, StringComparison.CurrentCultureIgnoreCase))
+            throw new UserFacingException("Skriv profilens navn for at bekræfte, at den skal slettes.");
+        db.Profiles.Remove(p);
+        await db.SaveChangesAsync();
+        current.Clear();
+        return Redirect("/profiler");
+    }
+
+    [HttpPost("skift"), AllowWithoutProfile]
+    public IActionResult Switch()
+    {
+        current.Clear();
+        return Redirect("/profiler");
+    }
+}

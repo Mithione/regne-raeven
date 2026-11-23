@@ -1,0 +1,36 @@
+@model ProfilesModel
+@{
+    ViewData["Title"] = "Hvem regner i dag?";
+}
+<div class="hero mt">
+    <img src="@Ui.Assets/img/fox.svg" alt="">
+    <div>
+        <h1>Hej! Hvem regner i dag?</h1>
+        <p class="muted">Regneræven hjælper dig med regnereglerne, gemmer dine opgaver og giver XP for dagens regnestykker.</p>
+    </div>
+</div>
+
+@if (Model.Profiles.Count > 0)
+{
+    <div class="profile-pick mt-lg">
+        @foreach (var p in Model.Profiles)
+        {
+            var lvl = Leveling.FromXp(p.Xp);
+            <form method="post" action="/profiler/@p.Id/vaelg">
+                <button type="submit">
+                    <span class="avatar lg" style="border-color:@p.Color">@p.Avatar</span>
+                    <b style="font-size:1.15rem">@p.Name</b>
+                    <span class="muted small">Level @lvl.Level · @CurrentProfile.ShownTitle(p).Name</span>
+                </button>
+            </form>
+        }
+    </div>
+}
+
+<div class="card mt-lg" style="max-width:640px">
+    <h2>@(Model.Profiles.Count == 0 ? "Lav din profil" : "Ny person")</h2>
+    <form method="post" action="/profiler/ny">
+        <partial name="_ProfileFields" model="null" />
+        <div class="mt"><button class="btn big" type="submit">Start 🦊</button></div>
+    </form>
+</div>

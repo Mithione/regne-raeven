@@ -1,0 +1,126 @@
+@{
+    ViewData["Title"] = "Tabeller";
+    ViewData["Nav"] = "tabeller";
+    var fractions = new (int N, int D)[] { (1, 2), (1, 3), (2, 3), (1, 4), (3, 4), (1, 5), (2, 5), (3, 5), (4, 5), (1, 8), (3, 8), (1, 10), (3, 10), (1, 20), (1, 100) };
+}
+<div class="topbar">
+    <div>
+        <h1>Tabeller</h1>
+        <div class="muted">Slå op – eller øv dig, til du kan dem udenad.</div>
+    </div>
+</div>
+
+<div class="tabs" data-tabs>
+    <button type="button" class="on" data-tab="gange">Gangetabel</button>
+    <button type="button" data-tab="oev">Øv en tabel</button>
+    <button type="button" data-tab="broek">Brøk · decimal · procent</button>
+    <button type="button" data-tab="enheder">Enheder</button>
+    <button type="button" data-tab="kvadrat">Kvadrattal</button>
+</div>
+
+<section class="card" data-panel="gange">
+    <div class="row between">
+        <p class="muted" style="margin:0">Peg på et tal for at se, hvilke to tal der er ganget. Kvadrattallene har en kant.</p>
+        <label class="row small"><input type="checkbox" id="show12"> Vis til 12</label>
+    </div>
+    <div style="overflow-x:auto" class="mt">
+        <table class="times" id="times">
+            <tr><th>·</th>@for (var c = 1; c <= 12; c++) { <th class="@(c > 10 ? "x12" : "")">@c</th> }</tr>
+            @for (var r = 1; r <= 12; r++)
+            {
+                <tr class="@(r > 10 ? "x12" : "")">
+                    <th>@r</th>
+                    @for (var c = 1; c <= 12; c++)
+                    {
+                        <td class="@(r == c ? "sq" : "") @(c > 10 ? "x12" : "")" data-r="@r" data-c="@c">@(r * c)</td>
+                    }
+                </tr>
+            }
+        </table>
+    </div>
+    <div class="grid three mt">
+        <div class="tip">💡 9-tabellen: tværsummen er altid 9 (2·9 = 18 → 1+8 = 9).</div>
+        <div class="tip">💡 5-tabellen ender altid på 0 eller 5.</div>
+        <div class="tip">💡 Kan du 2·7, kan du også 4·7: det er bare det dobbelte.</div>
+    </div>
+</section>
+
+<section class="card hidden" data-panel="oev">
+    <div class="row">
+        <span class="field" style="font-weight:700">Vælg tabel:</span>
+        <div class="chips" id="practice-pick">
+            @for (var n = 2; n <= 12; n++) { <button type="button" class="chip" data-n="@n" style="cursor:pointer">@n-tabellen</button> }
+        </div>
+    </div>
+    <div id="practice" class="mt hidden">
+        <p class="muted">Udfyld tabellen. Feltet bliver grønt, når det er rigtigt.</p>
+        <div id="practice-rows" class="table-list"></div>
+        <div class="row mt">
+            <button type="button" class="btn secondary small" id="practice-shuffle">🔀 Bland rækkefølgen</button>
+            <span id="practice-score" class="badge orange"></span>
+        </div>
+    </div>
+</section>
+
+<section class="card hidden" data-panel="broek">
+    <p class="muted">Det samme tal kan skrives på tre måder.</p>
+    <table class="plain" style="max-width:560px">
+        <tr><th>Brøk</th><th>Decimaltal</th><th>Procent</th></tr>
+        @foreach (var (n, d) in fractions)
+        {
+            var r = new Rational(n, d);
+            var dec = r.HasFiniteDecimals ? r.ToDecimalString() : "≈ " + r.ToDecimalString(3);
+            var pct = (r * 100).HasFiniteDecimals ? (r * 100).ToDecimalString() : "≈ " + (r * 100).ToDecimalString(1);
+            <tr><td><b>@n/@d</b></td><td>@dec</td><td>@pct %</td></tr>
+        }
+    </table>
+</section>
+
+<section class="card hidden" data-panel="enheder">
+    <div class="grid three">
+        <div>
+            <h3>📏 Længde</h3>
+            <table class="plain">
+                <tr><td>1 km</td><td>= 1000 m</td></tr>
+                <tr><td>1 m</td><td>= 10 dm</td></tr>
+                <tr><td>1 m</td><td>= 100 cm</td></tr>
+                <tr><td>1 dm</td><td>= 10 cm</td></tr>
+                <tr><td>1 cm</td><td>= 10 mm</td></tr>
+            </table>
+        </div>
+        <div>
+            <h3>⚖️ Vægt</h3>
+            <table class="plain">
+                <tr><td>1 ton</td><td>= 1000 kg</td></tr>
+                <tr><td>1 kg</td><td>= 1000 g</td></tr>
+                <tr><td>½ kg</td><td>= 500 g</td></tr>
+            </table>
+        </div>
+        <div>
+            <h3>🥛 Rumfang</h3>
+            <table class="plain">
+                <tr><td>1 l</td><td>= 10 dl</td></tr>
+                <tr><td>1 l</td><td>= 100 cl</td></tr>
+                <tr><td>1 l</td><td>= 1000 ml</td></tr>
+                <tr><td>1 dl</td><td>= 100 ml</td></tr>
+            </table>
+        </div>
+    </div>
+    <div class="grid two mt">
+        <div class="tip">⬇️ Fra stor til lille enhed: <b>gang</b>. 3 m = 3 · 100 = 300 cm.</div>
+        <div class="tip">⬆️ Fra lille til stor enhed: <b>divider</b>. 250 cm = 250 : 100 = 2,5 m.</div>
+    </div>
+    <h3 class="mt-lg">⏱️ Tid</h3>
+    <div class="table-list"><span>1 time = 60 min</span><span>1 min = 60 sek</span><span>1 døgn = 24 timer</span><span>1 uge = 7 døgn</span><span>1 år = 12 måneder</span><span>½ time = 30 min</span></div>
+</section>
+
+<section class="card hidden" data-panel="kvadrat">
+    <p class="muted">Et kvadrattal er et tal ganget med sig selv – som arealet af et kvadrat.</p>
+    <div class="table-list">
+        @for (var n = 1; n <= 20; n++) { <span>@n · @n = <b>@(n * n)</b></span> }
+    </div>
+</section>
+
+@section Scripts {
+<script>rr.tables();</script>
+}
