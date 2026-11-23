@@ -11,12 +11,7 @@ Her samler vi ideer. Skriv dem ind under **Nye ideer**, og flyt dem videre, når
   - I profilen: vælg **kvinde- eller mandestemme** og evt. tempo (langsom/normal).
   - Teknik: browserens/Windows' indbyggede oplæsning (`speechSynthesis`), sat lidt langsommere for en rolig stemme. Opstillinger og tegn som »·«, »:« og »3/4« skal skrives om til ord (»gange«, »divideret med«, »tre fjerdedele«), før de læses op.
   - Tjek først hvilke danske stemmer der findes på pc'en. Windows har typisk én dansk kvindestemme som standard; en dansk mandestemme kan kræve ekstra stemmer eller en online-tjeneste. Findes kun én, kan valget skjules.
-- **Rævetitler og unlocks under profilen:** flyt titel-oversigten fra Regnespil ind på »Din profil«, så profilen bliver stedet for alt det, man har låst op.
-  - Nyt område »Mine unlocks«: nye, smartere avatars, der låses op ved bestemte levels/titler (fx en ræv med briller ved Snu ræv, astronaut-ræv ved Stjerneræv, ræv med krone ved Mesterræv).
-  - Låste avatars vises gråtonede med »Låses op ved level X«, så der er noget at stræbe efter.
-  - Ved level-up: dialogen fortæller også, hvis der er en ny avatar, med en knap »Brug den nu«.
-  - Senere: andre slags unlocks, fx farvetemaer eller rammer om avataren.
-  - Kræver tegnede avatars (SVG i samme stil som ræve-logoet) i stedet for emojis.
+- **Flere slags unlocks** under »Mine unlocks«: farvetemaer, rammer om avataren, baggrunde.
 - **Guld og mit rævehule-værelse:** ud over XP optjener man guld 🪙 fra opgaverne og bruger det på ting til sit eget ræve-værelse.
   - XP kan aldrig bruges (det er ens level); guld kan bruges i butikken. Begge stiger, når man løser opgaver.
   - Guld pr. opgave følger sværhedsgraden (som XP), plus guld-bonus for dagens opgaver og dage i træk. Ingen guld for opgivne opgaver.
@@ -57,6 +52,8 @@ Her samler vi ideer. Skriv dem ind under **Nye ideer**, og flyt dem videre, når
 - Billede af opgaven fra bogen gemt sammen med en gemt opgave.
 
 ## Lavet
+
+- **Rævetitler og unlocks under profilen** (23. nov. 2026): titler flyttet til »Din profil«, 11 tegnede ræve låses op ved titel-levels, gråtonede låste ræve, »Brug den nu« i level-up-dialogen.
 
 - **Indtal opgaver med mikrofonen** (23. nov. 2026): 🎤-knap under »Gem en opgave«, der starter Windows' stemmeskrivning (dansk). Talte regnestykker oversættes til tal og tegn med et »Brug det«-forslag. Browserens talegenkendelse bruges, hvis det bliver en hjemmeside.
 

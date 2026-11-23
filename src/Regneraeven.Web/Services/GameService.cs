@@ -7,7 +7,10 @@ using Regneraeven.Web.Data;
 
 namespace Regneraeven.Web.Services;
 
-public sealed record LevelUp(int From, int To, IReadOnlyList<FoxTitle> NewTitles);
+/// <summary>A newly unlocked fox, with its drawing so the level-up dialog can show it.</summary>
+public sealed record NewAvatar(string Key, string Name, string Description, string Svg);
+
+public sealed record LevelUp(int From, int To, IReadOnlyList<FoxTitle> NewTitles, IReadOnlyList<NewAvatar> NewAvatars);
 
 public sealed record AnswerOutcome(
     bool Correct,
@@ -22,7 +25,8 @@ public sealed record AnswerOutcome(
     LevelUp? LevelUp,
     int TotalXp,
     int Level,
-    int LevelPercent);
+    int LevelPercent,
+    string TitleName);
 
 /// <summary>The game: today's tasks, training, XP, levels and the daily streak.</summary>
 public class GameService(AppDb db, TimeProvider clock)
@@ -138,7 +142,10 @@ public class GameService(AppDb db, TimeProvider clock)
         await db.SaveChangesAsync();
         var after = Leveling.FromXp(p.Xp);
         var levelUp = after.Level > before.Level
-            ? new LevelUp(before.Level, after.Level, Leveling.TitlesUnlockedBetween(before.Level, after.Level).ToList())
+            ? new LevelUp(before.Level, after.Level,
+                Leveling.TitlesUnlockedBetween(before.Level, after.Level).ToList(),
+                Unlocks.UnlockedBetween(before.Level, after.Level)
+                    .Select(a => new NewAvatar(a.Key, a.Name, a.Description, Infrastructure.AvatarArt.Svg(a.Id))).ToList())
             : null;
         return Outcome(p, t, task, correct, message, xp, bonus, levelUp);
     }
@@ -150,7 +157,7 @@ public class GameService(AppDb db, TimeProvider clock)
         return new AnswerOutcome(correct, message, xp, Math.Max(0, Leveling.MaxAttempts - t.Attempts), finished,
             finished ? task.AnswerText : null,
             finished ? task.Solution : null,
-            bonus, CurrentProfile.LiveStreak(p, Today), levelUp, p.Xp, info.Level, info.Percent);
+            bonus, CurrentProfile.LiveStreak(p, Today), levelUp, p.Xp, info.Level, info.Percent, CurrentProfile.ShownTitle(p).Name);
     }
 
     private void Award(Profile p, int amount, string reason)

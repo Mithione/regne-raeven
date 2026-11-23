@@ -37,7 +37,7 @@
             </nav>
             <div class="spacer"></div>
             <a class="side-profile" href="/profiler/rediger" title="Din profil">
-                <span class="avatar" style="border-color:@profile.Color">@profile.Avatar</span>
+                @Ui.Avatar(profile.Avatar, profile.Color)
                 <span class="who">
                     <b>@profile.Name</b>
                     <span>Level @level!.Level · @CurrentProfile.ShownTitle(profile).Name</span>

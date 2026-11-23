@@ -39,6 +39,23 @@ public static class Ui
         _ => "",
     });
 
+    /// <summary>A profile picture: a start emoji, or a drawn fox ("fox:briller") as inline SVG.</summary>
+    public static IHtmlContent Avatar(string? avatar, string? color = null, string size = "")
+    {
+        var style = color is null ? "" : $" style=\"border-color:{E(color)}\"";
+        var cls = "avatar" + (size.Length > 0 ? " " + size : "");
+        if (Core.Progress.Unlocks.Find(avatar) is { } fox)
+            return new HtmlString($"<span class=\"{cls} drawn\"{style} title=\"{E(fox.Name)}\">{AvatarArt.Svg(fox.Id)}</span>");
+        return new HtmlString($"<span class=\"{cls}\"{style}>{E(avatar ?? "🦊")}</span>");
+    }
+
+    public static string ToHtml(this IHtmlContent content)
+    {
+        using var w = new StringWriter();
+        content.WriteTo(w, HtmlEncoder.Default);
+        return w.ToString();
+    }
+
     public static string Difficulty(int d) => d switch { 1 => "Let", 2 => "Middel", _ => "Svær" };
 
     public static string Stars(int d) => new string('★', d) + new string('☆', 3 - d);

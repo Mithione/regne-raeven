@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Regneraeven.Core.Progress;
 using Regneraeven.Web.Data;
+using Regneraeven.Web.Infrastructure;
 using Regneraeven.Web.Models;
 using Regneraeven.Web.Services;
 
@@ -26,7 +27,6 @@ public class HomeController(AppDb db, CurrentProfile current, GameService game) 
 [Route("profiler")]
 public class ProfilesController(AppDb db, CurrentProfile current) : Controller
 {
-    public static readonly string[] Avatars = ["🦊", "🐻", "🐼", "🐯", "🦁", "🐸", "🐙", "🦄", "🐲", "🐧", "🦉", "🐬", "🐱", "🐶", "🦖", "🚀"];
     public static readonly string[] Colors = ["#f26b1d", "#e03e5c", "#7a5af8", "#2563eb", "#0e9384", "#2e9e5b", "#ca8a04", "#475467"];
 
     [HttpGet(""), AllowWithoutProfile]
@@ -45,7 +45,7 @@ public class ProfilesController(AppDb db, CurrentProfile current) : Controller
         var p = new Profile
         {
             Name = name,
-            Avatar = Avatars.Contains(form.Avatar) ? form.Avatar! : Avatars[0],
+            Avatar = Unlocks.CanUse(form.Avatar, 1) ? form.Avatar! : Unlocks.Avatars[0].Key,
             Color = Colors.Contains(form.Color) ? form.Color! : Colors[0],
             Grade = form.Grade is 5 or 6 ? form.Grade : 5,
         };
@@ -74,7 +74,7 @@ public class ProfilesController(AppDb db, CurrentProfile current) : Controller
         var name = (form.Name ?? "").Trim();
         if (name.Length == 0) throw new UserFacingException("Skriv et navn.");
         p.Name = name.Length > 40 ? name[..40] : name;
-        if (Avatars.Contains(form.Avatar)) p.Avatar = form.Avatar!;
+        if (Unlocks.CanUse(form.Avatar, Leveling.FromXp(p.Xp).Level)) p.Avatar = form.Avatar!;
         if (Colors.Contains(form.Color)) p.Color = form.Color!;
         if (form.Grade is 5 or 6) p.Grade = form.Grade;
         await db.SaveChangesAsync();
@@ -89,7 +89,22 @@ public class ProfilesController(AppDb db, CurrentProfile current) : Controller
         var info = Leveling.FromXp(p.Xp);
         p.ShownTitleLevel = Leveling.Titles.Any(t => t.Level == level) && level <= info.Level ? level : null;
         await db.SaveChangesAsync();
-        return Redirect("/spil#titler");
+        return Redirect("/profiler/rediger#titler");
+    }
+
+    /// <summary>Choose a start emoji or an unlocked fox. Also called from the level-up dialog ("Brug den nu").</summary>
+    [HttpPost("avatar")]
+    public async Task<IActionResult> ChooseAvatar(string? avatar)
+    {
+        var p = await current.RequireAsync();
+        if (!Unlocks.CanUse(avatar, Leveling.FromXp(p.Xp).Level))
+            throw new UserFacingException("Den avatar er ikke låst op endnu.");
+        p.Avatar = avatar!;
+        await db.SaveChangesAsync();
+        if (Request.Headers.Accept.ToString().Contains("json", StringComparison.OrdinalIgnoreCase))
+            return Json(new { ok = true, html = Ui.Avatar(p.Avatar, p.Color).ToHtml() });
+        TempData["Info"] = Unlocks.Find(avatar) is { } fox ? $"Du er nu {fox.Name}! 🦊" : "Din avatar er skiftet.";
+        return Redirect("/profiler/rediger#unlocks");
     }
 
     [HttpPost("slet")]

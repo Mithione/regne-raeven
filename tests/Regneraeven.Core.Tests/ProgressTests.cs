@@ -66,3 +66,27 @@ public class ProgressTests
         Assert.Equal("-0,5", new Rational(-1, 2).ToDecimalString());
     }
 }
+
+public class UnlockTests
+{
+    [Fact]
+    public void Every_title_level_unlocks_a_fox_avatar()
+    {
+        Assert.Equal(Leveling.Titles.Select(t => t.Level), Unlocks.Avatars.Select(a => a.Level));
+        Assert.All(Unlocks.Avatars, a => Assert.True(a.Key.Length <= 16, a.Key)); // fits the database column
+        Assert.Equal(Unlocks.Avatars.Count, Unlocks.Avatars.Select(a => a.Id).Distinct().Count());
+    }
+
+    [Fact]
+    public void Avatars_can_only_be_used_once_unlocked()
+    {
+        Assert.True(Unlocks.CanUse("🐼", 1));
+        Assert.True(Unlocks.CanUse("fox:hvalp", 1));
+        Assert.False(Unlocks.CanUse("fox:briller", 9));
+        Assert.True(Unlocks.CanUse("fox:briller", 10));
+        Assert.False(Unlocks.CanUse("fox:findes-ikke", 99));
+        Assert.False(Unlocks.CanUse("<script>", 99));
+        Assert.Equal(["briller"], Unlocks.UnlockedBetween(9, 12).Select(a => a.Id));
+        Assert.Equal("lyn", Unlocks.Next(10)!.Id);
+    }
+}

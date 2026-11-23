@@ -1,6 +1,9 @@
 @model Profile?
 @{
-    var avatar = Model?.Avatar ?? Regneraeven.Web.Controllers.ProfilesController.Avatars[0];
+    // New profile: pick an avatar here. Existing profile: avatars are chosen under "Mine unlocks".
+    var isNew = Model is null;
+    var starter = Unlocks.Avatars[0].Key;
+    var avatar = Model?.Avatar ?? starter;
     var color = Model?.Color ?? Regneraeven.Web.Controllers.ProfilesController.Colors[0];
     var grade = Model?.Grade ?? 5;
 }
@@ -9,15 +12,20 @@
         <label class="field" for="Name">Navn</label>
         <input type="text" id="Name" name="Name" value="@Model?.Name" maxlength="40" required autocomplete="off" placeholder="Fx Ida">
     </div>
-    <div>
-        <span class="field" style="display:block;font-weight:700;margin-bottom:6px">Vælg dit dyr</span>
-        <div class="avatar-pick">
-            @foreach (var a in Regneraeven.Web.Controllers.ProfilesController.Avatars)
-            {
-                <label><input type="radio" name="Avatar" value="@a" checked="@(a == avatar)"><span>@a</span></label>
-            }
+    @if (isNew)
+    {
+        <div>
+            <span class="field" style="display:block;font-weight:700;margin-bottom:6px">Vælg dit dyr</span>
+            <div class="avatar-pick">
+                <label title="@Unlocks.Avatars[0].Name"><input type="radio" name="Avatar" value="@starter" checked="@(avatar == starter)"><span>@Ui.Avatar(starter)</span></label>
+                @foreach (var a in Unlocks.StartEmojis)
+                {
+                    <label><input type="radio" name="Avatar" value="@a" checked="@(a == avatar)"><span>@a</span></label>
+                }
+            </div>
+            <div class="field-help">Flere tegnede ræve låses op, når du stiger i level 🦊</div>
         </div>
-    </div>
+    }
     <div>
         <span class="field" style="display:block;font-weight:700;margin-bottom:6px">Farve</span>
         <div class="color-pick">

@@ -65,7 +65,7 @@ public class GameController(AppDb db, CurrentProfile current, GameService game) 
     }
 
     [HttpGet("titler")]
-    public IActionResult Titles() => Redirect("/spil#titler");
+    public IActionResult Titles() => Redirect("/profiler/rediger#titler");
 
     public static int SuggestedDifficulty(Profile p) =>
         Math.Clamp((p.Grade <= 5 ? 1 : 2) + (Leveling.FromXp(p.Xp).Level >= 20 ? 1 : 0), 1, 3);

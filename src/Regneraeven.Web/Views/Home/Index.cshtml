@@ -11,7 +11,7 @@
 }
 <div class="topbar">
     <div>
-        <h1>@greeting, @p.Name! @p.Avatar</h1>
+        <h1 class="row" style="gap:14px">@Ui.Avatar(p.Avatar, p.Color) @greeting, @p.Name!</h1>
         <div class="muted">Hvad skal vi regne i dag?</div>
     </div>
     @if (Model.Streak > 0) { <span class="streak">🔥 @Model.Streak @(Model.Streak == 1 ? "dag" : "dage i træk")</span> }

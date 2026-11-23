@@ -2,33 +2,126 @@
 @{
     ViewData["Title"] = "Din profil";
     var lvl = Leveling.FromXp(Model.Xp);
+    var shown = CurrentProfile.ShownTitle(Model);
+    var next = Unlocks.Next(lvl.Level);
+    var unlockedCount = Unlocks.Avatars.Count(a => Unlocks.IsUnlocked(a, lvl.Level));
+    // XP still needed to reach the next unlock.
+    var xpToNext = 0;
+    if (next is not null)
+    {
+        xpToNext = lvl.XpForNextLevel - lvl.XpIntoLevel;
+        for (var l = lvl.Level + 1; l < next.Level; l++) xpToNext += Leveling.XpForNext(l);
+    }
 }
-<div class="topbar"><h1>Din profil</h1></div>
-<div class="grid two">
+<div class="card">
+    <div class="row" style="gap:22px">
+        @Ui.Avatar(Model.Avatar, Model.Color, "xl")
+        <div style="flex:1;min-width:220px">
+            <h1 style="margin:0">@Model.Name</h1>
+            <div class="title-name">@shown.Icon @shown.Name</div>
+            <div class="muted small">Level @lvl.Level · @Model.Xp XP i alt · @Model.Grade. klasse</div>
+            <div class="xpbar mt" style="max-width:360px;margin-top:8px"><i style="width:@lvl.Percent%"></i></div>
+            <div class="muted small" style="margin-top:4px">@lvl.XpIntoLevel / @lvl.XpForNextLevel XP til level @(lvl.Level + 1)</div>
+        </div>
+        @if (next is not null)
+        {
+            <div class="next-unlock card soft" style="box-shadow:none;padding:14px 18px">
+                <span style="filter:grayscale(1);opacity:.55">@Ui.Avatar(next.Key)</span>
+                <div>
+                    <div class="small muted">Næste unlock</div>
+                    <b>@next.Name</b>
+                    <div class="small">Level @next.Level · @xpToNext XP endnu</div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="card" id="unlocks">
+    <div class="row between">
+        <h2 style="margin:0">🎁 Mine unlocks</h2>
+        <span class="badge orange">@unlockedCount af @Unlocks.Avatars.Count ræve låst op</span>
+    </div>
+    <p class="muted small">Nye ræve låses op, når du stiger i level. Klik på en ræv for at bruge den som din avatar.</p>
+    <div class="unlocks">
+        @foreach (var a in Unlocks.Avatars)
+        {
+            var open = Unlocks.IsUnlocked(a, lvl.Level);
+            var chosen = Model.Avatar == a.Key;
+            var title = Leveling.TitleFor(a.Level);
+            if (open)
+            {
+                <form method="post" action="/profiler/avatar">
+                    <input type="hidden" name="avatar" value="@a.Key">
+                    <button type="submit" class="unlock @(chosen ? "chosen" : "")" title="@a.Description" style="width:100%">
+                        @Ui.Avatar(a.Key)
+                        <b>@a.Name</b>
+                        <span class="muted">@(chosen ? "✓ Bruges nu" : "Brug denne")</span>
+                    </button>
+                </form>
+            }
+            else
+            {
+                <div class="unlock locked-u" title="@a.Description">
+                    @Ui.Avatar(a.Key)
+                    <b>@a.Name</b>
+                    <span class="lock-badge">🔒 Låses op ved level @a.Level</span>
+                    <span class="muted">@title.Icon @title.Name</span>
+                </div>
+            }
+        }
+    </div>
+
+    <h3 class="mt-lg">Startdyr</h3>
+    <div class="emoji-pick">
+        @foreach (var e in Unlocks.StartEmojis)
+        {
+            <form method="post" action="/profiler/avatar" class="inline">
+                <input type="hidden" name="avatar" value="@e">
+                <button type="submit" class="@(Model.Avatar == e ? "chosen" : "")">@e</button>
+            </form>
+        }
+    </div>
+</div>
+
+<div class="card" id="titler">
+    <h2>🏅 Rævetitler</h2>
+    <p class="muted small">En ny titel låses op hvert 5.–10. level. Vælg selv, hvilken titel du vil vise.</p>
+    <div class="titles">
+        @foreach (var t in Leveling.Titles)
+        {
+            var unlocked = t.Level <= lvl.Level;
+            <div class="t @(unlocked ? "" : "locked-t") @(t.Level == shown.Level ? "shown" : "")" title="@t.Description">
+                <div class="i">@(unlocked ? t.Icon : "🔒")</div>
+                <b>@t.Name</b>
+                <span class="muted small">Level @t.Level</span>
+                @if (unlocked && t.Level != shown.Level)
+                {
+                    <form method="post" action="/profiler/titel"><input type="hidden" name="level" value="@t.Level"><button class="btn ghost small" type="submit">Vis</button></form>
+                }
+                else if (t.Level == shown.Level)
+                {
+                    <div class="small" style="color:var(--fox-dark);font-weight:700;margin-top:6px">✓ Vises</div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<div class="grid two mt">
     <div class="card">
+        <h2>Mine oplysninger</h2>
         <form method="post" action="/profiler/rediger">
             <partial name="_ProfileFields" model="Model" />
             <div class="mt"><button class="btn" type="submit">Gem</button></div>
         </form>
     </div>
-    <div>
-        <div class="card">
-            <div class="level-card">
-                <div class="level-ring" style="--p:@lvl.Percent"><div><span>Level</span><b>@lvl.Level</b></div></div>
-                <div>
-                    <div class="title-name">@CurrentProfile.ShownTitle(Model).Icon @CurrentProfile.ShownTitle(Model).Name</div>
-                    <div class="muted">@Model.Xp XP i alt</div>
-                    <a href="/spil#titler">Se alle titler →</a>
-                </div>
-            </div>
-        </div>
-        <div class="card">
-            <h3>Slet profil</h3>
-            <p class="muted small">Sletter @Model.Name med alle gemte opgaver og XP. Det kan ikke fortrydes.</p>
-            <form method="post" action="/profiler/slet" class="row">
-                <input type="text" name="confirmName" placeholder="Skriv »@Model.Name« for at bekræfte" style="max-width:260px" autocomplete="off">
-                <button class="btn danger" type="submit">Slet profil</button>
-            </form>
-        </div>
+    <div class="card">
+        <h3>Slet profil</h3>
+        <p class="muted small">Sletter @Model.Name med alle gemte opgaver, XP og unlocks. Det kan ikke fortrydes.</p>
+        <form method="post" action="/profiler/slet" class="row">
+            <input type="text" name="confirmName" placeholder="Skriv »@Model.Name« for at bekræfte" style="max-width:260px" autocomplete="off">
+            <button class="btn danger" type="submit">Slet profil</button>
+        </form>
     </div>
 </div>

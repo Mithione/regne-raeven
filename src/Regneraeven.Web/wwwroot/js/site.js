@@ -164,16 +164,39 @@
 
   function levelUpDialog(lu) {
     const title = lu.newTitles && lu.newTitles.length ? lu.newTitles[lu.newTitles.length - 1] : null;
+    // The drawing comes from the server's own fixed SVG set (no user content).
+    const fox = lu.newAvatars && lu.newAvatars.length ? lu.newAvatars[lu.newAvatars.length - 1] : null;
     const o = document.createElement('div');
     o.className = 'overlay';
     o.innerHTML = `<div class="dialog">
-        <div class="emoji">${title ? esc(title.icon) : '🎉'}</div>
+        ${fox ? '' : `<div class="emoji">${title ? esc(title.icon) : '🎉'}</div>`}
         <h2>Level ${lu.to}!</h2>
-        ${title ? `<p>Du har låst en ny titel op:</p><p class="title-name">${esc(title.name)}</p><p class="muted">${esc(title.description)}</p>`
-                : `<p>Flot klaret – du er steget i level.</p>`}
-        <button class="btn big mt" type="button">Fedt! 🦊</button></div>`;
-    o.querySelector('button').addEventListener('click', () => o.remove());
-    o.addEventListener('click', e => { if (e.target === o) o.remove(); });
+        ${title ? `<p>Ny titel: <b>${esc(title.icon)} ${esc(title.name)}</b></p>` : `<p>Flot klaret – du er steget i level.</p>`}
+        ${fox ? `<div class="avatar drawn new-avatar">${fox.svg}</div>
+                 <p>Du har låst en ny ræv op: <b>${esc(fox.name)}</b><br><span class="muted">${esc(fox.description)}</span></p>
+                 <div class="row" style="justify-content:center">
+                   <button class="btn big" type="button" data-use>Brug den nu</button>
+                   <button class="btn secondary" type="button" data-close>Senere</button>
+                 </div>`
+              : `<button class="btn big mt" type="button" data-close>Fedt! 🦊</button>`}
+      </div>`;
+    const close = () => o.remove();
+    o.querySelector('[data-close]').addEventListener('click', close);
+    o.addEventListener('click', e => { if (e.target === o) close(); });
+    o.querySelector('[data-use]')?.addEventListener('click', async e => {
+      e.currentTarget.disabled = true;
+      try {
+        const res = await fetch('/profiler/avatar', {
+          method: 'POST',
+          headers: { 'Accept': 'application/json', 'RequestVerificationToken': token },
+          body: new URLSearchParams({ avatar: fox.key }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Det gik ikke.');
+        document.querySelectorAll('.side-profile .avatar').forEach(a => a.outerHTML = data.html);
+        close();
+      } catch (err) { alert(err.message); e.currentTarget.disabled = false; }
+    });
     document.body.appendChild(o);
     confetti();
   }
@@ -220,7 +243,7 @@
       const bar = document.querySelector('.side-profile .xpbar i');
       if (bar) bar.style.width = r.levelPercent + '%';
       const lvlText = document.querySelector('.side-profile .who > span');
-      if (lvlText) lvlText.textContent = lvlText.textContent.replace(/Level \d+/, 'Level ' + r.level);
+      if (lvlText) lvlText.textContent = `Level ${r.level} · ${r.titleName}`;
     }
 
     function show(r) {
