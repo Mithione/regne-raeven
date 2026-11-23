@@ -48,7 +48,7 @@ public static class AvatarArt
         sb.Append($"<path d=\"M8 26 Q14 40 32 44 Q24 52 32 58 Q20 54 14 42 Z\" fill=\"{f.Cheeks}\"/>");
         sb.Append($"<path d=\"M56 26 Q50 40 32 44 Q40 52 32 58 Q44 54 50 42 Z\" fill=\"{f.Cheeks}\"/>");
         // eyes + nose
-        sb.Append("<ellipse cx=\"23\" cy=\"32\" rx=\"3.2\" ry=\"4\" fill=\"#1f2937\"/><ellipse cx=\"41\" cy=\"32\" rx=\"3.2\" ry=\"4\" fill=\"#1f2937\"/>");
+        sb.Append("<ellipse class=\"eye\" cx=\"23\" cy=\"32\" rx=\"3.2\" ry=\"4\" fill=\"#1f2937\"/><ellipse class=\"eye\" cx=\"41\" cy=\"32\" rx=\"3.2\" ry=\"4\" fill=\"#1f2937\"/>");
         sb.Append("<circle cx=\"24.2\" cy=\"30.6\" r=\"1.1\" fill=\"#fff\"/><circle cx=\"42.2\" cy=\"30.6\" r=\"1.1\" fill=\"#fff\"/>");
         sb.Append("<path d=\"M28 50 Q32 47 36 50 Q34 54 32 54 Q30 54 28 50 Z\" fill=\"#1f2937\"/>");
         sb.Append(accessory);

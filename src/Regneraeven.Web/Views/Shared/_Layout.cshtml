@@ -12,7 +12,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@(string.IsNullOrEmpty(title) ? "Regneræven" : title + " – Regneræven")</title>
     <link rel="icon" href="@Ui.Assets/img/fox.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="@Ui.Assets/css/site.css?v=9">
+    <link rel="stylesheet" href="@Ui.Assets/css/site.css?v=10">
     <meta name="rr-token" content="@Xsrf()">
 </head>
 <body class="@Ui.ThemeClass(profile)" data-voice="@(profile?.Voice ?? "kvinde")" data-rate="@(profile?.SpeechRate ?? "rolig")">
@@ -61,7 +61,7 @@
         @RenderBody()
     </main>
 </div>
-<script src="@Ui.Assets/js/site.js?v=9"></script>
+<script src="@Ui.Assets/js/site.js?v=10"></script>
 <script src="@Ui.Assets/js/speech.js?v=1"></script>
 @await RenderSectionAsync("Scripts", required: false)
 </body>

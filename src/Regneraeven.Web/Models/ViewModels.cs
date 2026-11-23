@@ -43,4 +43,4 @@ public sealed record TypingIndexModel(Dictionary<string, int> BestStars, Diction
 
 public sealed record TypingLessonModel(Regneraeven.Core.Typing.TypingLesson Lesson, string Text, int BestStars);
 
-public sealed record RoomModel(Profile Profile, int Level, HashSet<string> Bought, Dictionary<Regneraeven.Core.Room.RoomSlot, string> Layout);
+public sealed record RoomModel(Profile Profile, int Level, HashSet<string> Bought, Regneraeven.Core.Room.RoomLayout Layout);

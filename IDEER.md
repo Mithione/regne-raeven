@@ -4,7 +4,7 @@ Her samler vi ideer. Skriv dem ind under **Nye ideer**, og flyt dem videre, når
 
 ## Nye ideer
 
-- **Mere til værelset:** flere ting pr. kategori, sæsonting (jul, halloween), frit at flytte ting rundt, vise sit værelse til søskende-profilerne.
+- **Mere til værelset:** flere ting pr. kategori, sæsonting (jul, halloween), små pyntegenstande der kan stilles på hylder og borde, flere af samme ting, vise sit værelse til søskende-profilerne.
 - **Mere 10-finger:** en daglig skriveopgave ved siden af dagens regneopgaver, egne titler/unlocks for skrivning (fx »Lynpote«), to tegnede hænder der viser fingeren.
 
 ## Planlagt
@@ -25,6 +25,8 @@ Her samler vi ideer. Skriv dem ind under **Nye ideer**, og flyt dem videre, når
 - Billede af opgaven fra bogen gemt sammen med en gemt opgave.
 
 ## Lavet
+
+- **Hyggeligere værelse med flyt, vend, drej og lag** (23. nov. 2026): tegninger i legende »klistermærke«-stil med tykke konturer, gardiner, nat/dag, blinkende ræv; alle ting og ræven kan trækkes frit, vendes, drejes og lægges frem/tilbage; kassen til ting man ikke bruger; gamle værelser konverteres automatisk.
 
 - **Guld og mit ræve-værelse** (23. nov. 2026): guld følger med XP (1 pr. 4 XP, også 10-finger og bonusser), butik med ca. 40 tegnede ting i 9 kategorier, værelse med barnets ræv, level-låste ting, startguld til eksisterende børn.
 

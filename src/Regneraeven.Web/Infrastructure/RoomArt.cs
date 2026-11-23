@@ -5,64 +5,65 @@ using Regneraeven.Core.Room;
 namespace Regneraeven.Web.Infrastructure;
 
 /// <summary>
-/// The fox room as inline SVG (front view, 800 × 500). Every item is drawn in its own box, so the same
-/// drawing is used in the room and as a thumbnail in the shop.
+/// The fox room as inline SVG (front view, 800 × 500) in a cosy "sticker" style: every thing gets a thick soft
+/// outline and a small shadow. Things are drawn in their own box (see RoomGeometry) and placed by their bottom
+/// centre, so they can be moved, flipped, tilted and layered in the browser.
 /// </summary>
 public static class RoomArt
 {
-    private readonly record struct Box(double X, double Y, double W, double H);
-
-    private static readonly Dictionary<RoomSlot, Box> Boxes = new()
-    {
-        [RoomSlot.Wall] = new(0, 0, 800, 500),
-        [RoomSlot.Poster] = new(80, 40, 130, 150),
-        [RoomSlot.Shelf] = new(40, 196, 210, 54),
-        [RoomSlot.Light] = new(520, 24, 240, 110),
-        [RoomSlot.Bed] = new(480, 250, 300, 190),
-        [RoomSlot.Bedding] = new(480, 250, 300, 190),
-        [RoomSlot.Desk] = new(40, 270, 260, 170),
-        [RoomSlot.Plant] = new(412, 300, 60, 140),
-        [RoomSlot.Rug] = new(230, 405, 320, 80),
-    };
-
     private static string N(double v) => v.ToString("0.##", CultureInfo.InvariantCulture);
 
-    /// <summary>The whole room with the child's fox standing on the rug.</summary>
-    public static string Room(IReadOnlyDictionary<RoomSlot, RoomItem?> shown, string foxSvg)
+    /// <summary>Thick dark outline + soft drop shadow around a whole drawing.</summary>
+    private const string StickerFilter =
+        "<filter id=\"sticker\" x=\"-15%\" y=\"-15%\" width=\"130%\" height=\"135%\" color-interpolation-filters=\"sRGB\">" +
+        "<feMorphology in=\"SourceAlpha\" operator=\"dilate\" radius=\"2.6\" result=\"grow\"/>" +
+        "<feFlood flood-color=\"#4a2f1f\" result=\"ink\"/><feComposite in=\"ink\" in2=\"grow\" operator=\"in\" result=\"outline\"/>" +
+        "<feOffset in=\"grow\" dy=\"6\" result=\"drop\"/><feGaussianBlur in=\"drop\" stdDeviation=\"3\" result=\"blur\"/>" +
+        "<feFlood flood-color=\"#3b2414\" flood-opacity=\".22\"/><feComposite in2=\"blur\" operator=\"in\" result=\"shadow\"/>" +
+        "<feMerge><feMergeNode in=\"shadow\"/><feMergeNode in=\"outline\"/><feMergeNode in=\"SourceGraphic\"/></feMerge></filter>";
+
+    /// <summary>The whole room. Each placed thing is a &lt;g class="ri"&gt; that the browser can move.</summary>
+    public static string Room(RoomLayout layout, string foxSvg)
     {
         var sb = new StringBuilder("<svg class=\"room-svg\" viewBox=\"0 0 800 500\" xmlns=\"http://www.w3.org/2000/svg\" role=\"img\" aria-label=\"Mit værelse\">");
-        sb.Append(Wall(shown.GetValueOrDefault(RoomSlot.Wall)?.Id ?? "hvid"));
-        sb.Append(Floor());
-        sb.Append(Window());
-        foreach (var slot in new[] { RoomSlot.Rug, RoomSlot.Poster, RoomSlot.Shelf, RoomSlot.Light, RoomSlot.Desk, RoomSlot.Bed, RoomSlot.Bedding, RoomSlot.Plant })
+        sb.Append("<defs>").Append(StickerFilter).Append(ShellDefs).Append("</defs>");
+        sb.Append(Wall(layout.Wall));
+        sb.Append(Shell());
+        sb.Append("<g class=\"room-items\">");
+        foreach (var p in layout.Items.OrderBy(i => i.Z))
         {
-            if (shown.GetValueOrDefault(slot) is not { } item) continue;
-            var b = Boxes[slot];
-            sb.Append($"<g transform=\"translate({N(b.X)} {N(b.Y)})\" data-slot=\"{slot}\">{Item(item, shown.GetValueOrDefault(RoomSlot.Bed)?.Id)}</g>");
+            if (p.Id == RoomLayout.Fox)
+            {
+                sb.Append(Placed(p, Fox(foxSvg), RoomGeometry.FoxSize.W, RoomGeometry.FoxSize.H, "Fox", "Ræven"));
+                continue;
+            }
+            if (RoomCatalog.Find(p.Id) is not { } item) continue;
+            var (w, h) = RoomGeometry.Size(item.Slot);
+            sb.Append(Placed(p, Drawing(item, layout.Bedding), w, h, item.Slot.ToString(), item.Name));
         }
-        // The fox, standing in front of the rug.
-        sb.Append("<ellipse cx=\"397\" cy=\"440\" rx=\"44\" ry=\"7\" fill=\"#000\" opacity=\".12\"/>");
-        sb.Append(foxSvg.Replace("<svg ", "<svg x=\"338\" y=\"318\" width=\"118\" height=\"118\" ", StringComparison.Ordinal));
+        sb.Append("</g>");
+        // Night: a dark layer over the room (lights shine through it via CSS), and a soft vignette.
+        sb.Append("<rect class=\"night-overlay\" x=\"0\" y=\"0\" width=\"800\" height=\"500\" fill=\"#0b1640\" pointer-events=\"none\"/>");
+        sb.Append("<rect x=\"0\" y=\"0\" width=\"800\" height=\"500\" fill=\"url(#room-vignette)\" pointer-events=\"none\"/>");
         sb.Append("</svg>");
         return sb.ToString();
     }
 
-    /// <summary>A small picture of one item for the shop.</summary>
-    public static string Thumb(RoomItem item)
-    {
-        if (item.Slot == RoomSlot.Wall)
-            return $"<svg viewBox=\"0 220 300 280\" xmlns=\"http://www.w3.org/2000/svg\">{Wall(item.Id)}{Floor()}</svg>";
-        var b = Boxes[item.Slot];
-        var pad = Math.Max(b.W, b.H) * 0.08;
-        var extraTop = item.Id is "himmelseng" ? 70 : item.Id is "koeje" ? 10 : 0;
-        var inner = item.Slot == RoomSlot.Bedding ? Bed("simpel") + Bedding(item.Id) : Item(item, null);
-        return $"<svg viewBox=\"{N(-pad)} {N(-pad - extraTop)} {N(b.W + 2 * pad)} {N(b.H + 2 * pad + extraTop)}\" xmlns=\"http://www.w3.org/2000/svg\">{inner}</svg>";
-    }
+    /// <summary>A placed thing: bottom centre at (X, Y), mirrored and tilted around that point.</summary>
+    public static string Placed(PlacedItem p, string drawing, double w, double h, string slot, string name) =>
+        $"<g class=\"ri\" data-id=\"{p.Id}\" data-name=\"{System.Net.WebUtility.HtmlEncode(name)}\" data-slot=\"{slot}\" data-x=\"{N(p.X)}\" data-y=\"{N(p.Y)}\" data-f=\"{(p.Flip ? 1 : 0)}\" data-r=\"{N(p.Rotation)}\" data-z=\"{p.Z}\" data-w=\"{N(w)}\" data-h=\"{N(h)}\" " +
+        $"transform=\"{Transform(p.X, p.Y, p.Flip, p.Rotation, w, h)}\"><g filter=\"url(#sticker)\">{drawing}</g></g>";
 
-    private static string Item(RoomItem item, string? bedId) => item.Slot switch
+    public static string Transform(double x, double y, bool flip, double rotation, double w, double h) =>
+        $"translate({N(x)} {N(y)}) rotate({N(rotation)}) scale({(flip ? -1 : 1)} 1) translate({N(-w / 2)} {N(-h)})";
+
+    public static string Fox(string foxSvg) =>
+        foxSvg.Replace("<svg ", "<svg class=\"fox-blink\" x=\"0\" y=\"0\" width=\"118\" height=\"118\" ", StringComparison.Ordinal);
+
+    /// <summary>The drawing of a thing in its own box (beds come with the room's bedding).</summary>
+    public static string Drawing(RoomItem item, string bedding) => item.Slot switch
     {
-        RoomSlot.Bed => Bed(item.Id),
-        RoomSlot.Bedding => bedId == "raket" ? "" : Bedding(item.Id),
+        RoomSlot.Bed => Bed(item.Id) + (item.Id == "raket" ? "" : Bedding(bedding)),
         RoomSlot.Desk => Desk(item.Id),
         RoomSlot.Light => Light(item.Id),
         RoomSlot.Poster => Poster(item.Id),
@@ -72,37 +73,75 @@ public static class RoomArt
         _ => "",
     };
 
+    /// <summary>A small picture of one item for the shop, in the same sticker style.</summary>
+    public static string Thumb(RoomItem item)
+    {
+        if (item.Slot == RoomSlot.Wall)
+            return $"<svg viewBox=\"0 210 300 290\" xmlns=\"http://www.w3.org/2000/svg\"><defs>{ShellDefs}</defs>{Wall(item.Id)}{FloorOnly()}</svg>";
+        var (w, h) = item.Slot == RoomSlot.Bedding ? RoomGeometry.Size(RoomSlot.Bed) : RoomGeometry.Size(item.Slot);
+        var pad = Math.Max(w, h) * 0.1;
+        var extraTop = item.Id is "himmelseng" ? 70 : item.Id is "koeje" ? 60 : 0;
+        var extraLeft = item.Id == "raket" ? 30 : 0;
+        var inner = item.Slot == RoomSlot.Bedding ? Bed("simpel") + Bedding(item.Id) : Drawing(item, "hvidt");
+        return $"<svg viewBox=\"{N(-pad - extraLeft)} {N(-pad - extraTop)} {N(w + 2 * pad + extraLeft)} {N(h + 2 * pad + extraTop)}\" xmlns=\"http://www.w3.org/2000/svg\">" +
+               $"<defs>{StickerFilter}</defs><g filter=\"url(#sticker)\">{inner}</g></svg>";
+    }
+
     // ------------------------------------------------------------ room shell
+
+    private const string ShellDefs =
+        "<linearGradient id=\"rw-sky\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#7cc4ff\"/><stop offset=\"1\" stop-color=\"#dff3ff\"/></linearGradient>" +
+        "<linearGradient id=\"rw-night\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#0b1640\"/><stop offset=\"1\" stop-color=\"#2b3a7a\"/></linearGradient>" +
+        "<linearGradient id=\"rw-floor\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#dcab79\"/><stop offset=\"1\" stop-color=\"#b9844f\"/></linearGradient>" +
+        "<linearGradient id=\"rw-wallshade\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\".2\"/><stop offset=\".7\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\"1\" stop-color=\"#7a4a25\" stop-opacity=\".14\"/></linearGradient>" +
+        "<radialGradient id=\"room-vignette\" cx=\".5\" cy=\".45\" r=\".75\"><stop offset=\".62\" stop-color=\"#5a3418\" stop-opacity=\"0\"/><stop offset=\"1\" stop-color=\"#5a3418\" stop-opacity=\".22\"/></radialGradient>";
+
+    private const string Ink = "#4a2f1f";
+
+    private static string Shell() =>
+        // soft light on the wall and a crown moulding
+        "<rect x=\"0\" y=\"0\" width=\"800\" height=\"370\" fill=\"url(#rw-wallshade)\"/>" +
+        "<rect x=\"0\" y=\"0\" width=\"800\" height=\"16\" fill=\"#fffaf1\"/><rect x=\"0\" y=\"16\" width=\"800\" height=\"4\" fill=\"#e8d6bd\"/>" +
+        FloorOnly() +
+        // window with day/night sky (click it to switch) and a little plant on the sill
+        "<g class=\"window\" data-window>" +
+        $"<rect x=\"314\" y=\"58\" width=\"164\" height=\"164\" rx=\"18\" fill=\"#fff7ec\" stroke=\"{Ink}\" stroke-width=\"4\"/>" +
+        "<rect x=\"328\" y=\"72\" width=\"136\" height=\"136\" rx=\"10\" fill=\"url(#rw-sky)\" class=\"sky-day\"/>" +
+        "<rect x=\"328\" y=\"72\" width=\"136\" height=\"136\" rx=\"10\" fill=\"url(#rw-night)\" class=\"sky-night\"/>" +
+        "<g class=\"sky-day\"><circle cx=\"430\" cy=\"104\" r=\"15\" fill=\"#fde047\"/><ellipse cx=\"368\" cy=\"150\" rx=\"26\" ry=\"11\" fill=\"#fff\"/><ellipse cx=\"387\" cy=\"142\" rx=\"16\" ry=\"11\" fill=\"#fff\"/></g>" +
+        "<g class=\"sky-night\"><circle cx=\"428\" cy=\"104\" r=\"14\" fill=\"#fef3c7\"/><circle cx=\"434\" cy=\"99\" r=\"12\" fill=\"#1d2a5e\"/><circle cx=\"350\" cy=\"96\" r=\"2\" fill=\"#fff\"/><circle cx=\"372\" cy=\"170\" r=\"1.6\" fill=\"#fff\"/><circle cx=\"448\" cy=\"160\" r=\"1.8\" fill=\"#fff\"/></g>" +
+        "<path d=\"M396 72 V208 M328 140 H464\" stroke=\"#fff7ec\" stroke-width=\"6\"/>" +
+        $"<rect x=\"304\" y=\"216\" width=\"184\" height=\"14\" rx=\"7\" fill=\"#fff7ec\" stroke=\"{Ink}\" stroke-width=\"3\"/>" +
+        $"<path d=\"M440 216 h20 l-3 -14 h-14Z\" fill=\"#f97316\" stroke=\"{Ink}\" stroke-width=\"2.5\"/><circle cx=\"446\" cy=\"196\" r=\"7\" fill=\"#22c55e\" stroke=\"{Ink}\" stroke-width=\"2.5\"/><circle cx=\"455\" cy=\"192\" r=\"6\" fill=\"#4ade80\" stroke=\"{Ink}\" stroke-width=\"2.5\"/>" +
+        "</g>" +
+        // curtains on a rod
+        $"<path d=\"M286 40 H330 Q322 120 336 190 Q318 210 300 236 Q292 140 286 40Z\" fill=\"#fb7185\" stroke=\"{Ink}\" stroke-width=\"3.5\" stroke-linejoin=\"round\"/>" +
+        $"<path d=\"M506 40 H462 Q470 120 456 190 Q474 210 492 236 Q500 140 506 40Z\" fill=\"#fb7185\" stroke=\"{Ink}\" stroke-width=\"3.5\" stroke-linejoin=\"round\"/>" +
+        "<path d=\"M298 60 Q305 150 312 220 M494 60 Q487 150 480 220\" stroke=\"#fda4af\" stroke-width=\"3\" fill=\"none\"/>" +
+        $"<rect x=\"276\" y=\"32\" width=\"240\" height=\"10\" rx=\"5\" fill=\"#a16207\" stroke=\"{Ink}\" stroke-width=\"3\"/>" +
+        $"<circle cx=\"276\" cy=\"37\" r=\"8\" fill=\"#f59e0b\" stroke=\"{Ink}\" stroke-width=\"3\"/><circle cx=\"516\" cy=\"37\" r=\"8\" fill=\"#f59e0b\" stroke=\"{Ink}\" stroke-width=\"3\"/>";
+
+    private static string FloorOnly() =>
+        "<rect x=\"0\" y=\"370\" width=\"800\" height=\"130\" fill=\"url(#rw-floor)\"/>" +
+        "<path d=\"M0 402 H800 M0 436 H800 M0 470 H800 M120 370 V402 M330 402 V436 M560 370 V402 M210 436 V470 M690 436 V470 M90 470 V500 M460 470 V500 M760 402 V436\" stroke=\"#a87444\" stroke-width=\"2.5\" stroke-linecap=\"round\"/>" +
+        "<path d=\"M30 386 H90 M400 418 H470 M600 452 H660\" stroke=\"#f0c899\" stroke-width=\"3\" stroke-linecap=\"round\" opacity=\".7\"/>" +
+        $"<rect x=\"0\" y=\"358\" width=\"800\" height=\"16\" rx=\"4\" fill=\"#fffaf1\" stroke=\"{Ink}\" stroke-width=\"3\"/>";
 
     private static string Wall(string id)
     {
         const string area = "x=\"0\" y=\"0\" width=\"800\" height=\"370\"";
         return id switch
         {
-            "mint" => $"<rect {area} fill=\"#cdeee0\"/>",
-            "himmel" => $"<rect {area} fill=\"#cfe6fb\"/>",
-            "rosa" => $"<rect {area} fill=\"#fbdbe6\"/>",
-            "stjerner" => $"<defs><pattern id=\"pw-stars\" width=\"60\" height=\"60\" patternUnits=\"userSpaceOnUse\"><rect width=\"60\" height=\"60\" fill=\"#1e2a5a\"/><path d=\"M12 10 l2 4 4 1 -3 3 1 4 -4 -2 -4 2 1 -4 -3 -3 4 -1Z\" fill=\"#fde68a\"/><circle cx=\"44\" cy=\"38\" r=\"2\" fill=\"#fff\"/><circle cx=\"30\" cy=\"52\" r=\"1.2\" fill=\"#fde68a\"/></pattern></defs><rect {area} fill=\"url(#pw-stars)\"/>",
-            "taltapet" => $"<defs><pattern id=\"pw-tal\" width=\"70\" height=\"70\" patternUnits=\"userSpaceOnUse\"><rect width=\"70\" height=\"70\" fill=\"#fff7e8\"/><g font-family=\"Arial\" font-weight=\"700\" font-size=\"16\" fill=\"#f6b98d\"><text x=\"6\" y=\"20\">3</text><text x=\"40\" y=\"18\">+</text><text x=\"22\" y=\"42\">7</text><text x=\"52\" y=\"46\">×</text><text x=\"8\" y=\"64\">½</text><text x=\"42\" y=\"66\">=</text></g></pattern></defs><rect {area} fill=\"url(#pw-tal)\"/>",
+            "mint" => $"<rect {area} fill=\"#c6eedc\"/>",
+            "himmel" => $"<rect {area} fill=\"#c9e3fb\"/>",
+            "rosa" => $"<rect {area} fill=\"#fbd5e3\"/>",
+            "stjerner" => $"<defs><pattern id=\"pw-stars\" width=\"60\" height=\"60\" patternUnits=\"userSpaceOnUse\"><rect width=\"60\" height=\"60\" fill=\"#24326b\"/><path d=\"M12 10 l2 4 4 1 -3 3 1 4 -4 -2 -4 2 1 -4 -3 -3 4 -1Z\" fill=\"#fde68a\"/><circle cx=\"44\" cy=\"38\" r=\"2\" fill=\"#fff\"/><circle cx=\"30\" cy=\"52\" r=\"1.2\" fill=\"#fde68a\"/></pattern></defs><rect {area} fill=\"url(#pw-stars)\"/>",
+            "taltapet" => $"<defs><pattern id=\"pw-tal\" width=\"70\" height=\"70\" patternUnits=\"userSpaceOnUse\"><rect width=\"70\" height=\"70\" fill=\"#fff3e0\"/><g font-family=\"Arial\" font-weight=\"700\" font-size=\"16\" fill=\"#f6b98d\"><text x=\"6\" y=\"20\">3</text><text x=\"40\" y=\"18\">+</text><text x=\"22\" y=\"42\">7</text><text x=\"52\" y=\"46\">×</text><text x=\"8\" y=\"64\">½</text><text x=\"42\" y=\"66\">=</text></g></pattern></defs><rect {area} fill=\"url(#pw-tal)\"/>",
             "striber" => $"<defs><pattern id=\"pw-stripes\" width=\"180\" height=\"10\" patternUnits=\"userSpaceOnUse\"><rect width=\"30\" height=\"10\" fill=\"#fecaca\"/><rect x=\"30\" width=\"30\" height=\"10\" fill=\"#fed7aa\"/><rect x=\"60\" width=\"30\" height=\"10\" fill=\"#fef08a\"/><rect x=\"90\" width=\"30\" height=\"10\" fill=\"#bbf7d0\"/><rect x=\"120\" width=\"30\" height=\"10\" fill=\"#bfdbfe\"/><rect x=\"150\" width=\"30\" height=\"10\" fill=\"#ddd6fe\"/></pattern></defs><rect {area} fill=\"url(#pw-stripes)\"/>",
             "guldtapet" => $"<defs><pattern id=\"pw-gold\" width=\"40\" height=\"40\" patternUnits=\"userSpaceOnUse\"><rect width=\"40\" height=\"40\" fill=\"#f8e7a8\"/><path d=\"M20 2 L38 20 L20 38 L2 20Z\" fill=\"none\" stroke=\"#d4a017\" stroke-width=\"1.5\"/><circle cx=\"20\" cy=\"20\" r=\"3\" fill=\"#d4a017\"/></pattern></defs><rect {area} fill=\"url(#pw-gold)\"/>",
-            _ => $"<rect {area} fill=\"#f5f1ea\"/>",
+            _ => $"<rect {area} fill=\"#fbf3e6\"/>",
         };
     }
-
-    private static string Floor() =>
-        "<rect x=\"0\" y=\"370\" width=\"800\" height=\"130\" fill=\"#c9986a\"/>" +
-        "<path d=\"M0 400 H800 M0 432 H800 M0 466 H800 M120 370 V400 M330 400 V432 M560 370 V400 M210 432 V466 M690 432 V466 M90 466 V500 M460 466 V500\" stroke=\"#b5865a\" stroke-width=\"2\"/>" +
-        "<rect x=\"0\" y=\"362\" width=\"800\" height=\"10\" fill=\"#fffaf3\" stroke=\"#e7d8c4\"/>";
-
-    private static string Window() =>
-        "<defs><linearGradient id=\"rw-sky\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0\" stop-color=\"#93c5fd\"/><stop offset=\"1\" stop-color=\"#e0f2fe\"/></linearGradient></defs>" +
-        "<rect x=\"318\" y=\"64\" width=\"156\" height=\"156\" rx=\"6\" fill=\"#fff\" stroke=\"#e2d6c6\" stroke-width=\"3\"/>" +
-        "<rect x=\"328\" y=\"74\" width=\"136\" height=\"136\" fill=\"url(#rw-sky)\"/>" +
-        "<circle cx=\"430\" cy=\"104\" r=\"14\" fill=\"#fde68a\"/>" +
-        "<ellipse cx=\"370\" cy=\"150\" rx=\"26\" ry=\"10\" fill=\"#fff\"/><ellipse cx=\"388\" cy=\"143\" rx=\"16\" ry=\"10\" fill=\"#fff\"/>" +
-        "<path d=\"M396 74 V210 M328 142 H464\" stroke=\"#fff\" stroke-width=\"5\"/>" +
-        "<rect x=\"310\" y=\"218\" width=\"172\" height=\"10\" rx=\"3\" fill=\"#fff\" stroke=\"#e2d6c6\"/>";
 
     // ------------------------------------------------------------ items (local coordinates)
 

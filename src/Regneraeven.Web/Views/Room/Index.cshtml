@@ -3,21 +3,58 @@
     ViewData["Title"] = "Mit værelse";
     ViewData["Nav"] = "vaerelse";
     var p = Model.Profile;
-    var shown = RoomCatalog.Slots.ToDictionary(s => s.Slot, s => RoomCatalog.Shown(s.Slot, Model.Layout, Model.Bought));
+    var layout = Model.Layout;
     var level = Model.Level;
     var owned = RoomCatalog.Items.Count(i => !i.IsFree && Model.Bought.Contains(i.Id));
     var forSale = RoomCatalog.Items.Count(i => !i.IsFree);
+    var inBox = RoomCatalog.Items.Where(i => RoomLayouts.IsPlaceable(i) && RoomCatalog.Owns(i, Model.Bought) && !layout.Contains(i.Id)).ToList();
+    var fox = AvatarArt.Svg((Unlocks.Find(p.Avatar) ?? Unlocks.Avatars[0]).Id);
 }
 <div class="topbar">
     <div>
         <h1>🛏️ @p.Name@(p.Name.EndsWith('s') ? "'" : "s") rævehule</h1>
-        <div class="muted">Køb ting for dit guld, og indret værelset, som du vil. Du kan altid bytte rundt.</div>
+        <div class="muted">Træk tingene rundt, vend og drej dem, og læg dem foran eller bagved hinanden. Tryk på vinduet for nat og dag.</div>
     </div>
     <span class="gold-badge">🪙 @p.Gold guld</span>
 </div>
 
-<div class="card room-card">
-    @Html.Raw(RoomArt.Room(shown, AvatarArt.Svg((Unlocks.Find(p.Avatar) ?? Unlocks.Avatars[0]).Id)))
+<div class="card room-card" data-room>
+    @Html.Raw(RoomArt.Room(layout, fox))
+    <div class="room-toolbar" data-toolbar>
+        <span class="room-hint" data-hint>👆 Tryk på en ting for at flytte den</span>
+        <span class="room-selected hidden" data-selected-name></span>
+        <div class="room-tools">
+            <button type="button" class="tool" data-act="left" title="Drej mod venstre" disabled>↺</button>
+            <button type="button" class="tool" data-act="right" title="Drej mod højre" disabled>↻</button>
+            <button type="button" class="tool" data-act="straight" title="Ret op" disabled>⟂</button>
+            <button type="button" class="tool" data-act="flip" title="Vend" disabled>⇋ Vend</button>
+            <button type="button" class="tool" data-act="front" title="Læg forrest" disabled>⬆ Frem</button>
+            <button type="button" class="tool" data-act="back" title="Læg bagerst" disabled>⬇ Tilbage</button>
+            <button type="button" class="tool" data-act="box" title="Læg i kassen" disabled>📦 I kassen</button>
+        </div>
+        <span class="room-saved small muted" data-saved></span>
+    </div>
+</div>
+
+<div class="card mt" id="kasse">
+    <div class="row between">
+        <h2 style="margin:0">📦 Kassen</h2>
+        <span class="muted small">Ting du ejer, men som ikke står i værelset</span>
+    </div>
+    <div class="box-items mt" data-box>
+        @if (inBox.Count == 0) { <span class="muted small" data-box-empty>Kassen er tom.</span> }
+        @foreach (var item in inBox)
+        {
+            <form method="post" action="/vaerelse/placer" class="box-item">
+                <input type="hidden" name="id" value="@item.Id">
+                <button type="submit" title="Sæt @item.Name ind i værelset">
+                    <span class="thumb">@Html.Raw(RoomArt.Thumb(item))</span>
+                    <span>@item.Name</span>
+                    <span class="small muted">Sæt ind</span>
+                </button>
+            </form>
+        }
+    </div>
 </div>
 
 <div class="card mt">
@@ -33,33 +70,30 @@
     </div>
     @foreach (var s in RoomCatalog.Slots)
     {
-        var current = shown[s.Slot];
         <section class="hidden" data-panel="@s.Slot" id="@s.Slot">
-            @if (s.Optional && current is not null)
-            {
-                <form method="post" action="/vaerelse/fjern" class="row" style="margin-bottom:10px">
-                    <input type="hidden" name="slot" value="@s.Slot">
-                    <span class="small muted">Lige nu: <b>@current.Name</b></span>
-                    <button class="btn ghost small" type="submit">Tag den ud af værelset</button>
-                </form>
-            }
             <div class="shop">
                 @foreach (var item in RoomCatalog.InSlot(s.Slot))
                 {
                     var own = RoomCatalog.Owns(item, Model.Bought);
-                    var inUse = current?.Id == item.Id;
+                    var placeable = RoomLayouts.IsPlaceable(item);
+                    var inUse = placeable ? layout.Contains(item.Id) : (layout.Wall == item.Id || layout.Bedding == item.Id);
                     var check = RoomCatalog.CanBuy(item, p.Gold, level, Model.Bought);
                     <div class="shop-item @(inUse ? "in-use" : "") @(check == RoomCatalog.BuyCheck.NeedsLevel ? "locked-s" : "")" title="@item.Description">
                         <div class="thumb">@Html.Raw(RoomArt.Thumb(item))</div>
                         <b>@item.Name</b>
                         <span class="small muted">@item.Description</span>
-                        @if (inUse)
+                        @if (inUse && placeable)
                         {
                             <span class="badge green">✓ I dit værelse</span>
+                            <form method="post" action="/vaerelse/kasse"><input type="hidden" name="id" value="@item.Id"><button class="btn ghost small" type="submit">📦 Læg i kassen</button></form>
+                        }
+                        else if (inUse)
+                        {
+                            <span class="badge green">✓ Bruges nu</span>
                         }
                         else if (own)
                         {
-                            <form method="post" action="/vaerelse/placer"><input type="hidden" name="id" value="@item.Id"><button class="btn secondary small" type="submit">Brug den</button></form>
+                            <form method="post" action="/vaerelse/placer"><input type="hidden" name="id" value="@item.Id"><button class="btn secondary small" type="submit">@(placeable ? "Sæt ind" : "Brug den")</button></form>
                         }
                         else if (check == RoomCatalog.BuyCheck.NeedsLevel)
                         {
@@ -92,17 +126,16 @@
 </div>
 
 @section Scripts {
+<script src="@Ui.Assets/js/room.js?v=1"></script>
+<script>rrRoom.init(document.querySelector('[data-room]'));</script>
 <script>
 (function () {
   const tabs = document.querySelector('[data-room-tabs]');
   const show = slot => {
     tabs.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.tab === slot));
     document.querySelectorAll('[data-panel]').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== slot));
-    document.querySelectorAll('.room-svg [data-slot]').forEach(g => g.classList.toggle('hl', g.dataset.slot === slot || (slot === 'Bedding' && g.dataset.slot === 'Bed')));
   };
   tabs.addEventListener('click', e => { const b = e.target.closest('button[data-tab]'); if (b) { show(b.dataset.tab); history.replaceState(null, '', '#' + b.dataset.tab); } });
-  // Click something in the room to open its shelf in the shop.
-  document.querySelectorAll('.room-svg [data-slot]').forEach(g => g.addEventListener('click', () => { show(g.dataset.slot); tabs.scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
   const fromHash = location.hash.slice(1);
   show(tabs.querySelector(`[data-tab="${fromHash}"]`) ? fromHash : 'Wall');
 })();
