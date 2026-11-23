@@ -236,6 +236,8 @@
     if (bar) bar.style.width = r.levelPercent + '%';
     const lvlText = document.querySelector('.side-profile .who > span');
     if (lvlText) lvlText.textContent = `Level ${r.level} · ${r.titleName}`;
+    const gold = document.querySelector('.side-profile [data-gold]');
+    if (gold && typeof r.gold === 'number') gold.textContent = `🪙 ${r.gold}`;
   }
 
   // ------------------------------------------------------------------ game task page
@@ -283,6 +285,7 @@
       const cls = r.correct ? 'ok' : (r.finished ? 'tip' : 'no');
       let html = esc(r.message);
       if (r.xpAwarded > 0) html += ` <span class="xp-pop">+${r.xpAwarded} XP</span>`;
+      if (r.goldAwarded > 0) html += ` <span class="xp-pop gold-pop">+${r.goldAwarded} 🪙</span>`;
       if (r.dailyBonus > 0) html += `<br>🎁 Alle dagens opgaver er klaret! Bonus: <span class="xp-pop">+${r.dailyBonus} XP</span> · 🔥 ${r.streak} ${r.streak === 1 ? 'dag' : 'dage i træk'}`;
       feedback.innerHTML = `<div class="feedback ${cls}">${html}</div>`;
       if (r.correct) xpBadge.textContent = `+${r.xpAwarded} XP`;

@@ -42,3 +42,5 @@ public sealed record GameTaskModel(GameTask Entity, MathTask Task, int FullXp, L
 public sealed record TypingIndexModel(Dictionary<string, int> BestStars, Dictionary<string, int> BestWpm);
 
 public sealed record TypingLessonModel(Regneraeven.Core.Typing.TypingLesson Lesson, string Text, int BestStars);
+
+public sealed record RoomModel(Profile Profile, int Level, HashSet<string> Bought, Dictionary<Regneraeven.Core.Room.RoomSlot, string> Layout);

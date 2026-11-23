@@ -27,7 +27,9 @@ public sealed record AnswerOutcome(
     int Level,
     int LevelPercent,
     string TitleName,
-    StreakNews? StreakNews = null);
+    StreakNews? StreakNews = null,
+    int Gold = 0,
+    int GoldAwarded = 0);
 
 /// <summary>What happened to the day streak when today's tasks were finished.</summary>
 public sealed record StreakNews(int Streak, bool EarnedFreeze, int FreezesUsed, int Freezes, IReadOnlyList<MilestoneNews> Milestones);
@@ -96,6 +98,7 @@ public class GameService(AppDb db, TimeProvider clock)
         var t = await GetAsync(p, id);
         var task = Read(t);
         var before = Leveling.FromXp(p.Xp);
+        var goldBefore = p.Gold;
 
         if (t.Status != GameTaskStatus.Open)
             return Outcome(p, t, task, t.Status == GameTaskStatus.Solved, "Opgaven er allerede færdig.", 0, 0, null);
@@ -148,7 +151,7 @@ public class GameService(AppDb db, TimeProvider clock)
         await db.SaveChangesAsync();
         var after = Leveling.FromXp(p.Xp);
         var levelUp = LevelUpBetween(before.Level, after.Level);
-        return Outcome(p, t, task, correct, message, xp, bonus, levelUp) with { StreakNews = streakNews };
+        return Outcome(p, t, task, correct, message, xp, bonus, levelUp) with { StreakNews = streakNews, GoldAwarded = p.Gold - goldBefore };
     }
 
     /// <summary>All of today's tasks are done: move the streak on (using days off if needed) and pay out bonuses.</summary>
@@ -176,7 +179,7 @@ public class GameService(AppDb db, TimeProvider clock)
         return new AnswerOutcome(correct, message, xp, Math.Max(0, Leveling.MaxAttempts - t.Attempts), finished,
             finished ? task.AnswerText : null,
             finished ? task.Solution : null,
-            bonus, CurrentProfile.LiveStreak(p, Today), levelUp, p.Xp, info.Level, info.Percent, CurrentProfile.ShownTitle(p).Name);
+            bonus, CurrentProfile.LiveStreak(p, Today), levelUp, p.Xp, info.Level, info.Percent, CurrentProfile.ShownTitle(p).Name, Gold: p.Gold);
     }
 
     /// <summary>What a level-up unlocked (titles, foxes, frames …), or null if the level didn't change.</summary>
@@ -189,11 +192,14 @@ public class GameService(AppDb db, TimeProvider clock)
         : null;
 
     /// <summary>Adds XP to the profile and logs it (saved with the next SaveChanges).</summary>
+    /// <summary>Adds XP – and the gold that comes with it (1 per 4 XP) – and logs it (saved with the next SaveChanges).</summary>
     public void Award(Profile p, int amount, string reason)
     {
         if (amount <= 0) return;
+        var gold = Core.Room.RoomCatalog.GoldFor(amount);
         p.Xp += amount;
-        db.XpEvents.Add(new XpEvent { ProfileId = p.Id, Amount = amount, Reason = reason });
+        p.Gold += gold;
+        db.XpEvents.Add(new XpEvent { ProfileId = p.Id, Amount = amount, Gold = gold, Reason = reason });
     }
 
     public async Task<int> XpThisWeekAsync(Profile p)

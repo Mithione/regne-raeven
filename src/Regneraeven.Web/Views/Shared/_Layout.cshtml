@@ -12,7 +12,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@(string.IsNullOrEmpty(title) ? "Regneræven" : title + " – Regneræven")</title>
     <link rel="icon" href="@Ui.Assets/img/fox.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="@Ui.Assets/css/site.css?v=8">
+    <link rel="stylesheet" href="@Ui.Assets/css/site.css?v=9">
     <meta name="rr-token" content="@Xsrf()">
 </head>
 <body class="@Ui.ThemeClass(profile)" data-voice="@(profile?.Voice ?? "kvinde")" data-rate="@(profile?.SpeechRate ?? "rolig")">
@@ -33,6 +33,7 @@
                 <a class="@Active("spil")" href="/spil"><span class="ico">🎮</span>Regnespil</a>
                 <a class="@Active("skriv")" href="/skriv"><span class="ico">⌨️</span>10-finger</a>
                 <a class="@Active("opgaver")" href="/opgaver"><span class="ico">📒</span>Mine opgaver</a>
+                <a class="@Active("vaerelse")" href="/vaerelse"><span class="ico">🛏️</span>Mit værelse</a>
                 <a class="@Active("regler")" href="/regler"><span class="ico">📘</span>Regneregler</a>
                 <a class="@Active("tabeller")" href="/tabeller"><span class="ico">🔢</span>Tabeller</a>
             </nav>
@@ -42,6 +43,7 @@
                 <span class="who">
                     <b>@profile.Name</b>
                     <span>Level @level!.Level · @CurrentProfile.ShownTitle(profile).Name</span>
+                    <span class="gold" data-gold title="Guld – brug det i Mit værelse">🪙 @profile.Gold</span>
                     <span class="xpbar sm" style="display:block;margin-top:5px;width:120px"><i style="width:@level.Percent%"></i></span>
                 </span>
             </a>
@@ -59,7 +61,7 @@
         @RenderBody()
     </main>
 </div>
-<script src="@Ui.Assets/js/site.js?v=8"></script>
+<script src="@Ui.Assets/js/site.js?v=9"></script>
 <script src="@Ui.Assets/js/speech.js?v=1"></script>
 @await RenderSectionAsync("Scripts", required: false)
 </body>

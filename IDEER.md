@@ -4,16 +4,8 @@ Her samler vi ideer. Skriv dem ind under **Nye ideer**, og flyt dem videre, når
 
 ## Nye ideer
 
-- **Guld og mit rævehule-værelse:** ud over XP optjener man guld 🪙 fra opgaverne og bruger det på ting til sit eget ræve-værelse.
-  - XP kan aldrig bruges (det er ens level); guld kan bruges i butikken. Begge stiger, når man løser opgaver.
-  - Guld pr. opgave følger sværhedsgraden (som XP), plus guld-bonus for dagens opgaver og dage i træk. Ingen guld for opgivne opgaver.
-  - **Butik** med kategorier: seng, puder og sengetøj, vægfarve og tapet, skrivebord og stol, lamper og lys på væggen (lyskæde, neonskilt), tæpper, plakater og billeder, planter, reoler og legetøj.
-  - **Mit værelse:** et tegnet værelse set forfra, hvor hver ting har sin plads (seng, skrivebord, væg, gulv, vindue). Man vælger, hvilken af sine ting der står hvor, og kan skifte når som helst.
-  - Nogle ting låses først op ved bestemte levels/titler (fx et guld-skrivebord ved Guldræv), så de også passer sammen med unlocks under profilen.
-  - Senere: frit at flytte ting rundt, vise sit værelse til søskende-profilerne, sæsonting (jul, halloween).
-  - Kun guld fra opgaverne – aldrig rigtige penge.
-  - Kræver en del tegninger (SVG) – start med et lille sæt pr. kategori og udvid løbende.
-- **Mere 10-finger:** en daglig skriveopgave ved siden af dagens regneopgaver, egne titler/unlocks for skrivning (fx »Lynpote«), to tegnede hænder der viser fingeren, og guld pr. lektion når guld findes.
+- **Mere til værelset:** flere ting pr. kategori, sæsonting (jul, halloween), frit at flytte ting rundt, vise sit værelse til søskende-profilerne.
+- **Mere 10-finger:** en daglig skriveopgave ved siden af dagens regneopgaver, egne titler/unlocks for skrivning (fx »Lynpote«), to tegnede hænder der viser fingeren.
 
 ## Planlagt
 
@@ -33,6 +25,8 @@ Her samler vi ideer. Skriv dem ind under **Nye ideer**, og flyt dem videre, når
 - Billede af opgaven fra bogen gemt sammen med en gemt opgave.
 
 ## Lavet
+
+- **Guld og mit ræve-værelse** (23. nov. 2026): guld følger med XP (1 pr. 4 XP, også 10-finger og bonusser), butik med ca. 40 tegnede ting i 9 kategorier, værelse med barnets ræv, level-låste ting, startguld til eksisterende børn.
 
 - **Hjemmeside-udgave forberedt til Azure** (23. nov. 2026): server-projekt med forælder-login og Azure SQL, Dockerfile, GitHub Actions og Bicep-skabelon.
 - **GitHub** (23. nov. 2026): privat repo Mithione/regne-raeven.

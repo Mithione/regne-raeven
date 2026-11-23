@@ -21,6 +21,10 @@ public class Profile
     /// <summary>Klassetrin (5 or 6) – decides how hard the daily tasks are.</summary>
     public int Grade { get; set; } = 5;
     public int Xp { get; set; }
+    /// <summary>Gold (guld) – earned with XP (1 per 4 XP) and spent in the room shop.</summary>
+    public int Gold { get; set; }
+    /// <summary>What stands where in the fox room, as JSON: {"Wall":"mint","Bed":"trae"}.</summary>
+    public string? Room { get; set; }
     public int Streak { get; set; }
     public DateOnly? LastDailyDone { get; set; }
     /// <summary>Days off (fridage) that cover a missed day – earned every 7th day in a row, max 2.</summary>
@@ -108,6 +112,7 @@ public class XpEvent
     public int Id { get; set; }
     public int ProfileId { get; set; }
     public int Amount { get; set; }
+    public int Gold { get; set; }
     public string Reason { get; set; } = "";
     public DateTime At { get; set; } = DateTime.UtcNow;
 }
@@ -123,5 +128,16 @@ public class TypingResult
     public int Accuracy { get; set; }
     public int Wpm { get; set; }
     public int XpAwarded { get; set; }
+    public DateTime At { get; set; } = DateTime.UtcNow;
+}
+
+/// <summary>A thing bought for the fox room (gold only – never real money).</summary>
+public class RoomPurchase
+{
+    public int Id { get; set; }
+    public int ProfileId { get; set; }
+    /// <summary>Id from Core.Room.RoomCatalog (stable).</summary>
+    public string ItemId { get; set; } = "";
+    public int Price { get; set; }
     public DateTime At { get; set; } = DateTime.UtcNow;
 }

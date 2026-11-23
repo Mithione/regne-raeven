@@ -11,6 +11,7 @@ public class AppDb(DbContextOptions<AppDb> options) : DbContext(options)
     public DbSet<GameTask> GameTasks => Set<GameTask>();
     public DbSet<XpEvent> XpEvents => Set<XpEvent>();
     public DbSet<TypingResult> TypingResults => Set<TypingResult>();
+    public DbSet<RoomPurchase> RoomPurchases => Set<RoomPurchase>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -26,6 +27,7 @@ public class AppDb(DbContextOptions<AppDb> options) : DbContext(options)
             e.Property(p => p.Theme).HasMaxLength(24);
             e.Property(p => p.StreakClaims).HasMaxLength(500);
             e.Property(p => p.Voice).HasMaxLength(10).HasDefaultValue("kvinde");
+            e.Property(p => p.Room).HasMaxLength(1000);
             e.Property(p => p.SpeechRate).HasMaxLength(10).HasDefaultValue("rolig");
             e.Property(p => p.StreakRewards).HasMaxLength(2000);
         });
@@ -54,6 +56,13 @@ public class AppDb(DbContextOptions<AppDb> options) : DbContext(options)
             e.HasIndex(t => new { t.ProfileId, t.Day, t.IsDaily });
             e.HasOne<Profile>().WithMany().HasForeignKey(t => t.ProfileId).OnDelete(DeleteBehavior.Cascade);
             e.Property(t => t.LastAnswer).HasMaxLength(100);
+        });
+
+        b.Entity<RoomPurchase>(e =>
+        {
+            e.Property(r => r.ItemId).HasMaxLength(24);
+            e.HasIndex(r => new { r.ProfileId, r.ItemId }).IsUnique();
+            e.HasOne<Profile>().WithMany().HasForeignKey(r => r.ProfileId).OnDelete(DeleteBehavior.Cascade);
         });
 
         b.Entity<TypingResult>(e =>

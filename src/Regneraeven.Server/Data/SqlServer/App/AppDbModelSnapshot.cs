@@ -135,6 +135,9 @@ namespace Regneraeven.Server.Data.SqlServer.App
                         .HasMaxLength(24)
                         .HasColumnType("nvarchar(24)");
 
+                    b.Property<int>("Gold")
+                        .HasColumnType("int");
+
                     b.Property<int>("Grade")
                         .HasColumnType("int");
 
@@ -149,6 +152,10 @@ namespace Regneraeven.Server.Data.SqlServer.App
                     b.Property<string>("OwnerId")
                         .HasMaxLength(64)
                         .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("Room")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<int?>("ShownTitleLevel")
                         .HasColumnType("int");
@@ -193,6 +200,36 @@ namespace Regneraeven.Server.Data.SqlServer.App
                     b.HasIndex("OwnerId");
 
                     b.ToTable("Profiles");
+                });
+
+            modelBuilder.Entity("Regneraeven.Web.Data.RoomPurchase", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("At")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ItemId")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("nvarchar(24)");
+
+                    b.Property<int>("Price")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfileId", "ItemId")
+                        .IsUnique();
+
+                    b.ToTable("RoomPurchases");
                 });
 
             modelBuilder.Entity("Regneraeven.Web.Data.SavedProblem", b =>
@@ -295,6 +332,9 @@ namespace Regneraeven.Server.Data.SqlServer.App
                     b.Property<DateTime>("At")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("Gold")
+                        .HasColumnType("int");
+
                     b.Property<int>("ProfileId")
                         .HasColumnType("int");
 
@@ -324,6 +364,15 @@ namespace Regneraeven.Server.Data.SqlServer.App
                     b.HasOne("Regneraeven.Web.Data.SavedProblem", null)
                         .WithMany("Tags")
                         .HasForeignKey("SavedProblemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Regneraeven.Web.Data.RoomPurchase", b =>
+                {
+                    b.HasOne("Regneraeven.Web.Data.Profile", null)
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

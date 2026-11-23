@@ -52,6 +52,7 @@ public class TypingController(AppDb db, CurrentProfile current, GameService game
         var xp = TypingScore.Xp(lesson.Difficulty, bestBefore, run.Stars, practiceToday);
 
         var levelBefore = Leveling.FromXp(p.Xp).Level;
+        var goldBefore = p.Gold;
         game.Award(p, xp, $"10-finger: {lesson.Title}");
         db.TypingResults.Add(new TypingResult { ProfileId = p.Id, LessonId = lesson.Id, Stars = run.Stars, Accuracy = run.Accuracy, Wpm = run.Wpm, XpAwarded = xp });
         await db.SaveChangesAsync();
@@ -73,6 +74,8 @@ public class TypingController(AppDb db, CurrentProfile current, GameService game
             level = info.Level,
             levelPercent = info.Percent,
             titleName = CurrentProfile.ShownTitle(p).Name,
+            gold = p.Gold,
+            goldAwarded = p.Gold - goldBefore,
             levelUp = GameService.LevelUpBetween(levelBefore, info.Level),
         });
     }

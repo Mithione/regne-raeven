@@ -1,0 +1,110 @@
+@model RoomModel
+@{
+    ViewData["Title"] = "Mit værelse";
+    ViewData["Nav"] = "vaerelse";
+    var p = Model.Profile;
+    var shown = RoomCatalog.Slots.ToDictionary(s => s.Slot, s => RoomCatalog.Shown(s.Slot, Model.Layout, Model.Bought));
+    var level = Model.Level;
+    var owned = RoomCatalog.Items.Count(i => !i.IsFree && Model.Bought.Contains(i.Id));
+    var forSale = RoomCatalog.Items.Count(i => !i.IsFree);
+}
+<div class="topbar">
+    <div>
+        <h1>🛏️ @p.Name@(p.Name.EndsWith('s') ? "'" : "s") rævehule</h1>
+        <div class="muted">Køb ting for dit guld, og indret værelset, som du vil. Du kan altid bytte rundt.</div>
+    </div>
+    <span class="gold-badge">🪙 @p.Gold guld</span>
+</div>
+
+<div class="card room-card">
+    @Html.Raw(RoomArt.Room(shown, AvatarArt.Svg((Unlocks.Find(p.Avatar) ?? Unlocks.Avatars[0]).Id)))
+</div>
+
+<div class="card mt">
+    <div class="row between">
+        <h2 style="margin:0">🛒 Butikken</h2>
+        <span class="muted small">@owned af @forSale ting købt · du tjener 1 guld for hver 4 XP</span>
+    </div>
+    <div class="tabs mt" data-room-tabs>
+        @foreach (var s in RoomCatalog.Slots)
+        {
+            <button type="button" data-tab="@s.Slot">@s.Icon @s.Name</button>
+        }
+    </div>
+    @foreach (var s in RoomCatalog.Slots)
+    {
+        var current = shown[s.Slot];
+        <section class="hidden" data-panel="@s.Slot" id="@s.Slot">
+            @if (s.Optional && current is not null)
+            {
+                <form method="post" action="/vaerelse/fjern" class="row" style="margin-bottom:10px">
+                    <input type="hidden" name="slot" value="@s.Slot">
+                    <span class="small muted">Lige nu: <b>@current.Name</b></span>
+                    <button class="btn ghost small" type="submit">Tag den ud af værelset</button>
+                </form>
+            }
+            <div class="shop">
+                @foreach (var item in RoomCatalog.InSlot(s.Slot))
+                {
+                    var own = RoomCatalog.Owns(item, Model.Bought);
+                    var inUse = current?.Id == item.Id;
+                    var check = RoomCatalog.CanBuy(item, p.Gold, level, Model.Bought);
+                    <div class="shop-item @(inUse ? "in-use" : "") @(check == RoomCatalog.BuyCheck.NeedsLevel ? "locked-s" : "")" title="@item.Description">
+                        <div class="thumb">@Html.Raw(RoomArt.Thumb(item))</div>
+                        <b>@item.Name</b>
+                        <span class="small muted">@item.Description</span>
+                        @if (inUse)
+                        {
+                            <span class="badge green">✓ I dit værelse</span>
+                        }
+                        else if (own)
+                        {
+                            <form method="post" action="/vaerelse/placer"><input type="hidden" name="id" value="@item.Id"><button class="btn secondary small" type="submit">Brug den</button></form>
+                        }
+                        else if (check == RoomCatalog.BuyCheck.NeedsLevel)
+                        {
+                            <span class="price">🪙 @item.Price</span>
+                            <span class="small muted">🔒 Fra level @item.Level</span>
+                        }
+                        else if (check == RoomCatalog.BuyCheck.NotEnoughGold)
+                        {
+                            <span class="price">🪙 @item.Price</span>
+                            <span class="small muted">Mangler @(item.Price - p.Gold) guld</span>
+                        }
+                        else
+                        {
+                            <form method="post" action="/vaerelse/koeb"><input type="hidden" name="id" value="@item.Id"><button class="btn small" type="submit">Køb for 🪙 @item.Price</button></form>
+                        }
+                    </div>
+                }
+            </div>
+        </section>
+    }
+</div>
+
+<div class="card soft small mt">
+    <b>Sådan tjener du guld</b>
+    <ul style="padding-left:18px;margin:6px 0 0">
+        <li>Hver gang du får XP, får du også guld: 1 guld for hver 4 XP.</li>
+        <li>Svære opgaver, dagens bonus, dage i træk og 10-finger giver mest.</li>
+        <li>Guld kan kun tjenes med opgaver – aldrig købes for rigtige penge.</li>
+    </ul>
+</div>
+
+@section Scripts {
+<script>
+(function () {
+  const tabs = document.querySelector('[data-room-tabs]');
+  const show = slot => {
+    tabs.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.tab === slot));
+    document.querySelectorAll('[data-panel]').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== slot));
+    document.querySelectorAll('.room-svg [data-slot]').forEach(g => g.classList.toggle('hl', g.dataset.slot === slot || (slot === 'Bedding' && g.dataset.slot === 'Bed')));
+  };
+  tabs.addEventListener('click', e => { const b = e.target.closest('button[data-tab]'); if (b) { show(b.dataset.tab); history.replaceState(null, '', '#' + b.dataset.tab); } });
+  // Click something in the room to open its shelf in the shop.
+  document.querySelectorAll('.room-svg [data-slot]').forEach(g => g.addEventListener('click', () => { show(g.dataset.slot); tabs.scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
+  const fromHash = location.hash.slice(1);
+  show(tabs.querySelector(`[data-tab="${fromHash}"]`) ? fromHash : 'Wall');
+})();
+</script>
+}

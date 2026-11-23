@@ -154,7 +154,7 @@
         return;
       }
       const stars = '★'.repeat(r.stars) + '☆'.repeat(3 - r.stars);
-      const xpText = r.xp > 0 ? `<span class="xp-pop">+${r.xp} XP</span>${r.practice ? ' <span class="muted small">(øve-XP)</span>' : ''}` : '<span class="muted">0 XP</span>';
+      const xpText = r.xp > 0 ? `<span class="xp-pop">+${r.xp} XP</span>${r.goldAwarded > 0 ? ` <span class="xp-pop gold-pop">+${r.goldAwarded} 🪙</span>` : ''}${r.practice ? ' <span class="muted small">(øve-XP)</span>' : ''}` : '<span class="muted">0 XP</span>';
       const nextBtn = r.next && r.next.open
         ? `<a class="btn big" href="/skriv/${encodeURIComponent(r.next.id)}">Næste: ${rr.esc(r.next.title)} →</a>` : '';
       resultEl.innerHTML = `

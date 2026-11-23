@@ -124,6 +124,9 @@ namespace Regneraeven.Web.Data.Migrations
                         .HasMaxLength(24)
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Gold")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Grade")
                         .HasColumnType("INTEGER");
 
@@ -137,6 +140,10 @@ namespace Regneraeven.Web.Data.Migrations
 
                     b.Property<string>("OwnerId")
                         .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Room")
+                        .HasMaxLength(1000)
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("ShownTitleLevel")
@@ -182,6 +189,34 @@ namespace Regneraeven.Web.Data.Migrations
                     b.HasIndex("OwnerId");
 
                     b.ToTable("Profiles");
+                });
+
+            modelBuilder.Entity("Regneraeven.Web.Data.RoomPurchase", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("At")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ItemId")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Price")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ProfileId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfileId", "ItemId")
+                        .IsUnique();
+
+                    b.ToTable("RoomPurchases");
                 });
 
             modelBuilder.Entity("Regneraeven.Web.Data.SavedProblem", b =>
@@ -278,6 +313,9 @@ namespace Regneraeven.Web.Data.Migrations
                     b.Property<DateTime>("At")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("Gold")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("ProfileId")
                         .HasColumnType("INTEGER");
 
@@ -307,6 +345,15 @@ namespace Regneraeven.Web.Data.Migrations
                     b.HasOne("Regneraeven.Web.Data.SavedProblem", null)
                         .WithMany("Tags")
                         .HasForeignKey("SavedProblemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Regneraeven.Web.Data.RoomPurchase", b =>
+                {
+                    b.HasOne("Regneraeven.Web.Data.Profile", null)
+                        .WithMany()
+                        .HasForeignKey("ProfileId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
