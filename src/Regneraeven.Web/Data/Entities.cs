@@ -7,8 +7,12 @@ public class Profile
 {
     public int Id { get; set; }
     public string Name { get; set; } = "";
-    /// <summary>Emoji shown as avatar.</summary>
-    public string Avatar { get; set; } = "🦊";
+    /// <summary>The drawn fox, e.g. "fox:briller" (see Core.Progress.Unlocks).</summary>
+    public string Avatar { get; set; } = "fox:hvalp";
+    /// <summary>Chosen unlocks: frame around the avatar, background behind it and colour theme (null = default).</summary>
+    public string? Frame { get; set; }
+    public string? Background { get; set; }
+    public string? Theme { get; set; }
     public string Color { get; set; } = "#f26b1d";
     /// <summary>Klassetrin (5 or 6) – decides how hard the daily tasks are.</summary>
     public int Grade { get; set; } = 5;

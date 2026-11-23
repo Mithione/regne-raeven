@@ -73,7 +73,7 @@
         @{ var nextFox = Unlocks.Next(lvl.Level); }
         <a class="card tile" href="/profiler/rediger#unlocks" style="--c:var(--fox)">
             <div class="row">
-                @Ui.Avatar(p.Avatar, p.Color)
+                @Ui.Avatar(p)
                 <div style="flex:1">
                     <h3 style="margin:0">Titler og unlocks</h3>
                     <p>@(nextFox is null ? "Du har låst alle ræve op! 🌟" : $"Næste ræv: {nextFox.Name} på level {nextFox.Level}")</p>

@@ -3,19 +3,22 @@
     ViewData["Title"] = "Din profil";
     var lvl = Leveling.FromXp(Model.Xp);
     var shown = CurrentProfile.ShownTitle(Model);
-    var next = Unlocks.Next(lvl.Level);
-    var unlockedCount = Unlocks.Avatars.Count(a => Unlocks.IsUnlocked(a, lvl.Level));
+    var next = Unlocks.NextAnything(lvl.Level);
+    var foxCount = Unlocks.Avatars.Count(a => Unlocks.IsUnlocked(a, lvl.Level));
+    var frame = Unlocks.Current(UnlockKind.Frame, Model.Frame, lvl.Level);
+    var background = Unlocks.Current(UnlockKind.Background, Model.Background, lvl.Level);
+    var theme = Unlocks.Current(UnlockKind.Theme, Model.Theme, lvl.Level);
     // XP still needed to reach the next unlock.
     var xpToNext = 0;
-    if (next is not null)
+    if (next is { } n)
     {
         xpToNext = lvl.XpForNextLevel - lvl.XpIntoLevel;
-        for (var l = lvl.Level + 1; l < next.Level; l++) xpToNext += Leveling.XpForNext(l);
+        for (var l = lvl.Level + 1; l < n.Level; l++) xpToNext += Leveling.XpForNext(l);
     }
 }
 <div class="card">
     <div class="row" style="gap:22px">
-        @Ui.Avatar(Model.Avatar, Model.Color, "xl")
+        @Ui.Avatar(Model, "xl")
         <div style="flex:1;min-width:220px">
             <h1 style="margin:0">@Model.Name</h1>
             <div class="title-name">@shown.Icon @shown.Name</div>
@@ -23,14 +26,14 @@
             <div class="xpbar mt" style="max-width:360px;margin-top:8px"><i style="width:@lvl.Percent%"></i></div>
             <div class="muted small" style="margin-top:4px">@lvl.XpIntoLevel / @lvl.XpForNextLevel XP til level @(lvl.Level + 1)</div>
         </div>
-        @if (next is not null)
+        @if (next is { } nx)
         {
             <div class="next-unlock card soft" style="box-shadow:none;padding:14px 18px">
-                <span style="filter:grayscale(1);opacity:.55">@Ui.Avatar(next.Key)</span>
+                <span style="font-size:2rem">@nx.Icon</span>
                 <div>
                     <div class="small muted">Næste unlock</div>
-                    <b>@next.Name</b>
-                    <div class="small">Level @next.Level · @xpToNext XP endnu</div>
+                    <b>@nx.Text</b>
+                    <div class="small">Level @nx.Level · @xpToNext XP endnu</div>
                 </div>
             </div>
         }
@@ -40,9 +43,10 @@
 <div class="card" id="unlocks">
     <div class="row between">
         <h2 style="margin:0">🎁 Mine unlocks</h2>
-        <span class="badge orange">@unlockedCount af @Unlocks.Avatars.Count ræve låst op</span>
+        <span class="badge orange">@foxCount af @Unlocks.Avatars.Count ræve låst op</span>
     </div>
-    <p class="muted small">Nye ræve låses op, når du stiger i level. Klik på en ræv for at bruge den som din avatar.</p>
+    <p class="muted small">Nye ting låses op, når du stiger i level. Klik på noget, du har låst op, for at bruge det.</p>
+    <h3 class="mt">🦊 Ræve</h3>
     <div class="unlocks">
         @foreach (var a in Unlocks.Avatars)
         {
@@ -54,7 +58,7 @@
                 <form method="post" action="/profiler/avatar">
                     <input type="hidden" name="avatar" value="@a.Key">
                     <button type="submit" class="unlock @(chosen ? "chosen" : "")" title="@a.Description" style="width:100%">
-                        @Ui.Avatar(a.Key)
+                        @Ui.Avatar(a.Key, Model.Color, "", frame.Id, background.Id)
                         <b>@a.Name</b>
                         <span class="muted">@(chosen ? "✓ Bruges nu" : "Brug denne")</span>
                     </button>
@@ -63,7 +67,7 @@
             else
             {
                 <div class="unlock locked-u" title="@a.Description">
-                    @Ui.Avatar(a.Key)
+                    @Ui.Avatar(a.Key, Model.Color, "", frame.Id, background.Id)
                     <b>@a.Name</b>
                     <span class="lock-badge">🔒 Låses op ved level @a.Level</span>
                     <span class="muted">@title.Icon @title.Name</span>
@@ -72,17 +76,59 @@
         }
     </div>
 
-    <h3 class="mt-lg">Startdyr</h3>
-    <div class="emoji-pick">
-        @foreach (var e in Unlocks.StartEmojis)
-        {
-            <form method="post" action="/profiler/avatar" class="inline">
-                <input type="hidden" name="avatar" value="@e">
-                <button type="submit" class="@(Model.Avatar == e ? "chosen" : "")">@e</button>
-            </form>
-        }
-    </div>
 </div>
+
+@foreach (var kind in new[] { UnlockKind.Frame, UnlockKind.Background, UnlockKind.Theme })
+{
+    var d = Unlocks.Describe(kind);
+    var chosenId = kind switch { UnlockKind.Frame => frame.Id, UnlockKind.Background => background.Id, _ => theme.Id };
+    var items = Unlocks.Of(kind);
+    <div class="card" id="@kind.ToString().ToLowerInvariant()">
+        <div class="row between">
+            <h2 style="margin:0">@d.Icon @d.Plural</h2>
+            <span class="badge orange">@items.Count(i => Unlocks.IsUnlocked(i, lvl.Level)) af @items.Count låst op</span>
+        </div>
+        <p class="muted small">@(kind switch
+        {
+            UnlockKind.Frame => "En ramme om din ræv. »Klassisk« bruger din profilfarve.",
+            UnlockKind.Background => "Baggrunden bag din ræv.",
+            _ => "Farverne i hele Regneræven – knapper, menu og bjælker.",
+        })</p>
+        <div class="unlocks">
+            @foreach (var item in items)
+            {
+                var open = Unlocks.IsUnlocked(item, lvl.Level);
+                var chosen = item.Id == chosenId;
+                var preview = kind switch
+                {
+                    UnlockKind.Frame => Ui.Avatar(Model.Avatar, Model.Color, "", item.Id, background.Id),
+                    UnlockKind.Background => Ui.Avatar(Model.Avatar, Model.Color, "", frame.Id, item.Id),
+                    _ => new Microsoft.AspNetCore.Html.HtmlString($"<span class=\"swatch theme-{item.Id}\"><i></i><i></i><i></i></span>"),
+                };
+                if (open)
+                {
+                    <form method="post" action="/profiler/unlock">
+                        <input type="hidden" name="kind" value="@kind">
+                        <input type="hidden" name="id" value="@item.Id">
+                        <button type="submit" class="unlock @(chosen ? "chosen" : "")" title="@item.Description" style="width:100%">
+                            @preview
+                            <b>@item.Name</b>
+                            <span class="muted">@(chosen ? "✓ Bruges nu" : "Brug denne")</span>
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <div class="unlock locked-u" title="@item.Description">
+                        @preview
+                        <b>@item.Name</b>
+                        <span class="lock-badge">🔒 Låses op ved level @item.Level</span>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+}
 
 <div class="card" id="titler">
     <h2>🏅 Rævetitler</h2>

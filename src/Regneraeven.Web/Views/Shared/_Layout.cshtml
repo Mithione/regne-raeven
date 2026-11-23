@@ -12,10 +12,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@(string.IsNullOrEmpty(title) ? "Regneræven" : title + " – Regneræven")</title>
     <link rel="icon" href="@Ui.Assets/img/fox.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="@Ui.Assets/css/site.css?v=3">
+    <link rel="stylesheet" href="@Ui.Assets/css/site.css?v=4">
     <meta name="rr-token" content="@Xsrf()">
 </head>
-<body>
+<body class="@Ui.ThemeClass(profile)">
 @functions {
     private string Xsrf() =>
         Context.RequestServices.GetRequiredService<Microsoft.AspNetCore.Antiforgery.IAntiforgery>().GetAndStoreTokens(Context).RequestToken ?? "";
@@ -37,7 +37,7 @@
             </nav>
             <div class="spacer"></div>
             <a class="side-profile" href="/profiler/rediger" title="Din profil">
-                @Ui.Avatar(profile.Avatar, profile.Color)
+                @Ui.Avatar(profile)
                 <span class="who">
                     <b>@profile.Name</b>
                     <span>Level @level!.Level · @CurrentProfile.ShownTitle(profile).Name</span>
@@ -54,7 +54,7 @@
         @RenderBody()
     </main>
 </div>
-<script src="@Ui.Assets/js/site.js?v=3"></script>
+<script src="@Ui.Assets/js/site.js?v=4"></script>
 @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

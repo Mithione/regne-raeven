@@ -415,3 +415,55 @@ button.unlock:hover { border-color: var(--fox); transform: translateY(-1px); }
 .next-unlock { display: flex; gap: 14px; align-items: center; }
 .dialog .new-avatar { margin: 14px auto 4px; width: 110px; height: 110px; }
 .avatar-pick .avatar { width: 42px; height: 42px; border: 0; padding: 0; background: transparent; }
+
+/* ---------- Unlocks: frames, backgrounds, colour themes ---------- */
+.avatar { position: relative; }
+.avatar.drawn { --avbg: linear-gradient(#fff, #fff); background: var(--avbg); overflow: visible; border-color: var(--ring, var(--fox)); }
+
+/* Frames */
+.avatar.frame-klassisk { border-color: var(--ring, var(--fox)); }
+.avatar.frame-prikker { border-style: dotted; border-width: 4px; border-color: var(--ring, var(--fox)); }
+.avatar.frame-neon { border-color: #22d3ee; box-shadow: 0 0 0 2px #fff, 0 0 12px 3px rgba(34, 211, 238, .75); }
+.avatar.frame-guld { border: 5px double #d4a017; box-shadow: 0 0 0 2px #fde68a; }
+.avatar.frame-regnbue { border: 4px solid transparent; background: var(--avbg) padding-box, conic-gradient(#ff5f5f, #ffb347, #ffe66d, #7bd389, #5fa8ff, #b28dff, #ff5f5f) border-box; }
+.avatar.frame-stjerner { border-color: #facc15; box-shadow: 0 0 0 2px #fff7c2; }
+.avatar.frame-stjerner::before, .avatar.frame-stjerner::after { content: "★"; position: absolute; color: #facc15; text-shadow: 0 0 3px #fff, 0 0 2px #a16207; line-height: 1; font-size: .5em; }
+.avatar.frame-stjerner::before { top: -12%; right: -8%; }
+.avatar.frame-stjerner::after { bottom: -8%; left: -10%; font-size: .38em; }
+
+/* Backgrounds (single layer so frames can add a border layer on top) */
+.avatar.bg-hvid { --avbg: linear-gradient(#fff, #fff); }
+.avatar.bg-himmel { --avbg: linear-gradient(180deg, #7cc4ff 0%, #d7efff 100%); }
+.avatar.bg-solnedgang { --avbg: linear-gradient(180deg, #ff8a5c 0%, #ffc56e 55%, #ffe6ad 100%); }
+.avatar.bg-tal { --avbg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44'%3E%3Crect width='44' height='44' fill='%23fff7e8'/%3E%3Cg font-family='Arial' font-weight='700' font-size='11' fill='%23f6b98d'%3E%3Ctext x='3' y='13'%3E3%3C/text%3E%3Ctext x='25' y='12'%3E%2B%3C/text%3E%3Ctext x='14' y='27'%3E7%3C/text%3E%3Ctext x='34' y='29'%3E%C3%97%3C/text%3E%3Ctext x='4' y='41'%3E%C2%BD%3C/text%3E%3Ctext x='26' y='42'%3E9%3C/text%3E%3C/g%3E%3C/svg%3E") 0 0 / 22px 22px repeat; }
+.avatar.bg-skov { --avbg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23cdeefd'/%3E%3Cpath d='M0 44 Q16 34 32 42 T64 40 V64 H0Z' fill='%2386c98a'/%3E%3Cpath d='M6 46 L12 30 L18 46Z M46 44 L53 26 L60 44Z M28 50 L33 38 L38 50Z' fill='%23277a45'/%3E%3Cpath d='M0 54 Q20 48 40 54 T64 52 V64 H0Z' fill='%234fa864'/%3E%3C/svg%3E") center / cover no-repeat; }
+.avatar.bg-stjernehimmel { --avbg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%231e1b4b'/%3E%3Cg fill='%23fef9c3'%3E%3Ccircle cx='8' cy='10' r='1.2'/%3E%3Ccircle cx='22' cy='5' r='.8'/%3E%3Ccircle cx='52' cy='9' r='1.4'/%3E%3Ccircle cx='58' cy='26' r='.9'/%3E%3Ccircle cx='5' cy='34' r='.9'/%3E%3Ccircle cx='14' cy='56' r='1.1'/%3E%3Ccircle cx='50' cy='54' r='.8'/%3E%3Ccircle cx='60' cy='44' r='1.2'/%3E%3C/g%3E%3Ccircle cx='54' cy='16' r='5' fill='%23fde68a'/%3E%3Ccircle cx='56' cy='14' r='4.4' fill='%231e1b4b'/%3E%3C/svg%3E") center / cover no-repeat; }
+.avatar.bg-regnbue { --avbg: radial-gradient(circle at 50% 115%, #e8f4ff 34%, #b28dff 34% 41%, #5fa8ff 41% 48%, #7bd389 48% 55%, #ffe66d 55% 62%, #ffb347 62% 69%, #ff5f5f 69% 76%, #e8f4ff 76%); }
+
+/* Colour themes: they only change the accent colours (also used for the small previews). */
+.theme-skov { --fox: #2e9e5b; --fox-dark: #1f7a45; --fox-soft: #e8f6ee; --bg: #f6fbf7; --line: #dcefe3; --line-2: #c7e3d2; }
+.theme-hav { --fox: #2563eb; --fox-dark: #1d4ed8; --fox-soft: #e8f0fe; --bg: #f5f8ff; --line: #dfe7fb; --line-2: #c9d6f5; }
+.theme-lilla { --fox: #7c3aed; --fox-dark: #6d28d9; --fox-soft: #f1eafe; --bg: #faf7ff; --line: #e9dffc; --line-2: #d8c8f8; }
+.theme-jordbaer { --fox: #e11d48; --fox-dark: #be123c; --fox-soft: #ffe8ee; --bg: #fff7f9; --line: #fbdde4; --line-2: #f5c4d0; }
+.theme-is { --fox: #0891b2; --fox-dark: #0e7490; --fox-soft: #e0f7fb; --bg: #f5fcfd; --line: #d3eef4; --line-2: #b9e2eb; }
+.theme-nat { --fox: #6366f1; --fox-dark: #4f46e5; --fox-soft: #e0e7ff; --bg: #eceffa; --line: #dcdff3; --line-2: #c7cbed; }
+.theme-guld { --fox: #ca8a04; --fox-dark: #a16207; --fox-soft: #fef6d8; --bg: #fffdf5; --line: #f3e8c0; --line-2: #e9d79b; }
+body.theme-nat .side { background: #1e1b4b; border-color: #1e1b4b; }
+body.theme-nat .brand, body.theme-nat .side-profile .who b { color: #fff; }
+body.theme-nat .brand small, body.theme-nat .nav a { color: #c7d2fe; }
+body.theme-nat .nav a:hover { background: #312e81; }
+body.theme-nat .nav a.active { color: #fff; }
+body.theme-nat .side-profile { background: #312e81; border-color: #3730a3; }
+body.theme-nat .side-profile .who span { color: #c7d2fe; }
+body.theme-nat .side .btn.ghost { color: #c7d2fe; }
+.level-ring { background: conic-gradient(var(--fox) calc(var(--p) * 1%), var(--line) 0); }
+.xpbar { background: var(--line); }
+.xpbar > i { background: linear-gradient(90deg, color-mix(in srgb, var(--fox) 60%, white), var(--fox)); }
+
+/* Theme preview */
+.swatch { display: flex; gap: 5px; height: 72px; align-items: center; justify-content: center; }
+.swatch i { display: block; width: 20px; height: 46px; border-radius: 8px; border: 1px solid rgba(0, 0, 0, .08); }
+.swatch i:nth-child(1) { background: var(--fox); }
+.swatch i:nth-child(2) { background: var(--fox-soft); }
+.swatch i:nth-child(3) { background: var(--bg); }
+.unlock.locked-u .swatch { filter: grayscale(1); opacity: .45; }

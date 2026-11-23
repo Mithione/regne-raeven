@@ -39,15 +39,34 @@ public static class Ui
         _ => "",
     });
 
-    /// <summary>A profile picture: a start emoji, or a drawn fox ("fox:briller") as inline SVG.</summary>
-    public static IHtmlContent Avatar(string? avatar, string? color = null, string size = "")
+    /// <summary>
+    /// A drawn fox avatar as inline SVG, optionally with a frame and background (css classes frame-x / bg-x).
+    /// Old emoji avatars from before foxes-only are shown as the starter fox.
+    /// </summary>
+    public static IHtmlContent Avatar(string? avatar, string? color = null, string size = "", string? frame = null, string? background = null)
     {
-        var style = color is null ? "" : $" style=\"border-color:{E(color)}\"";
-        var cls = "avatar" + (size.Length > 0 ? " " + size : "");
-        if (Core.Progress.Unlocks.Find(avatar) is { } fox)
-            return new HtmlString($"<span class=\"{cls} drawn\"{style} title=\"{E(fox.Name)}\">{AvatarArt.Svg(fox.Id)}</span>");
-        return new HtmlString($"<span class=\"{cls}\"{style}>{E(avatar ?? "🦊")}</span>");
+        var fox = Core.Progress.Unlocks.Find(avatar) ?? Core.Progress.Unlocks.Avatars[0];
+        var style = color is null ? "" : $" style=\"--ring:{E(color)}\"";
+        var cls = "avatar drawn"
+                  + (size.Length > 0 ? " " + size : "")
+                  + $" frame-{E(frame ?? "klassisk")} bg-{E(background ?? "hvid")}";
+        return new HtmlString($"<span class=\"{cls}\"{style} title=\"{E(fox.Name)}\">{AvatarArt.Svg(fox.Id)}</span>");
     }
+
+    /// <summary>The profile's own avatar with its chosen (and still unlocked) frame and background.</summary>
+    public static IHtmlContent Avatar(Profile p, string size = "")
+    {
+        var level = Core.Progress.Leveling.FromXp(p.Xp).Level;
+        var fox = Core.Progress.Unlocks.CanUse(p.Avatar, level) ? p.Avatar : Core.Progress.Unlocks.Avatars[0].Key;
+        return Avatar(fox, p.Color, size,
+            Core.Progress.Unlocks.Current(Core.Progress.UnlockKind.Frame, p.Frame, level).Id,
+            Core.Progress.Unlocks.Current(Core.Progress.UnlockKind.Background, p.Background, level).Id);
+    }
+
+    /// <summary>The css class for the profile's colour theme (on &lt;body&gt;).</summary>
+    public static string ThemeClass(Profile? p) => p is null
+        ? "theme-raev"
+        : "theme-" + Core.Progress.Unlocks.Current(Core.Progress.UnlockKind.Theme, p.Theme, Core.Progress.Leveling.FromXp(p.Xp).Level).Id;
 
     public static string ToHtml(this IHtmlContent content)
     {

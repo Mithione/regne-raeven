@@ -14,7 +14,9 @@ public static class Program
     [STAThread]
     public static int Main(string[] args)
     {
-        var browserMode = args.Contains("--browser", StringComparer.OrdinalIgnoreCase);
+        // "dotnet ef" starts Main to find the database setup: then run as a plain server (no window,
+        // no "already running" box that would block the tool).
+        var browserMode = args.Contains("--browser", StringComparer.OrdinalIgnoreCase) || Microsoft.EntityFrameworkCore.EF.IsDesignTime;
 
         if (!browserMode)
         {

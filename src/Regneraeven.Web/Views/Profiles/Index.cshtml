@@ -18,7 +18,7 @@
             var lvl = Leveling.FromXp(p.Xp);
             <form method="post" action="/profiler/@p.Id/vaelg">
                 <button type="submit">
-                    @Ui.Avatar(p.Avatar, p.Color, "lg")
+                    @Ui.Avatar(p, "lg")
                     <b style="font-size:1.15rem">@p.Name</b>
                     <span class="muted small">Level @lvl.Level · @CurrentProfile.ShownTitle(p).Name</span>
                 </button>

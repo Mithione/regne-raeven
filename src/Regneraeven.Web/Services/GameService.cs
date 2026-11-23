@@ -10,7 +10,7 @@ namespace Regneraeven.Web.Services;
 /// <summary>A newly unlocked fox, with its drawing so the level-up dialog can show it.</summary>
 public sealed record NewAvatar(string Key, string Name, string Description, string Svg);
 
-public sealed record LevelUp(int From, int To, IReadOnlyList<FoxTitle> NewTitles, IReadOnlyList<NewAvatar> NewAvatars);
+public sealed record LevelUp(int From, int To, IReadOnlyList<FoxTitle> NewTitles, IReadOnlyList<NewAvatar> NewAvatars, IReadOnlyList<UnlockNews> NewItems);
 
 public sealed record AnswerOutcome(
     bool Correct,
@@ -145,7 +145,8 @@ public class GameService(AppDb db, TimeProvider clock)
             ? new LevelUp(before.Level, after.Level,
                 Leveling.TitlesUnlockedBetween(before.Level, after.Level).ToList(),
                 Unlocks.UnlockedBetween(before.Level, after.Level)
-                    .Select(a => new NewAvatar(a.Key, a.Name, a.Description, Infrastructure.AvatarArt.Svg(a.Id))).ToList())
+                    .Select(a => new NewAvatar(a.Key, a.Name, a.Description, Infrastructure.AvatarArt.Svg(a.Id))).ToList(),
+                Unlocks.CosmeticsUnlockedBetween(before.Level, after.Level).ToList())
             : null;
         return Outcome(p, t, task, correct, message, xp, bonus, levelUp);
     }

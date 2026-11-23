@@ -11,7 +11,6 @@ Her samler vi ideer. Skriv dem ind under **Nye ideer**, og flyt dem videre, når
   - I profilen: vælg **kvinde- eller mandestemme** og evt. tempo (langsom/normal).
   - Teknik: browserens/Windows' indbyggede oplæsning (`speechSynthesis`), sat lidt langsommere for en rolig stemme. Opstillinger og tegn som »·«, »:« og »3/4« skal skrives om til ord (»gange«, »divideret med«, »tre fjerdedele«), før de læses op.
   - Tjek først hvilke danske stemmer der findes på pc'en. Windows har typisk én dansk kvindestemme som standard; en dansk mandestemme kan kræve ekstra stemmer eller en online-tjeneste. Findes kun én, kan valget skjules.
-- **Flere slags unlocks** under »Mine unlocks«: farvetemaer, rammer om avataren, baggrunde.
 - **Guld og mit rævehule-værelse:** ud over XP optjener man guld 🪙 fra opgaverne og bruger det på ting til sit eget ræve-værelse.
   - XP kan aldrig bruges (det er ens level); guld kan bruges i butikken. Begge stiger, når man løser opgaver.
   - Guld pr. opgave følger sværhedsgraden (som XP), plus guld-bonus for dagens opgaver og dage i træk. Ingen guld for opgivne opgaver.
@@ -52,6 +51,8 @@ Her samler vi ideer. Skriv dem ind under **Nye ideer**, og flyt dem videre, når
 - Billede af opgaven fra bogen gemt sammen med en gemt opgave.
 
 ## Lavet
+
+- **Flere slags unlocks** (23. nov. 2026): rammer om avataren, baggrunde og farvetemaer under »Mine unlocks«, låst op mellem titel-levels. Kun ræve som avatar – startdyrene er fjernet.
 
 - **Rævetitler og unlocks under profilen** (23. nov. 2026): titler flyttet til »Din profil«, 11 tegnede ræve låses op ved titel-levels, gråtonede låste ræve, »Brug den nu« i level-up-dialogen.
 

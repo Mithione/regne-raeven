@@ -18,6 +18,9 @@ public class AppDb(DbContextOptions<AppDb> options) : DbContext(options)
             e.Property(p => p.Name).HasMaxLength(40);
             e.Property(p => p.Avatar).HasMaxLength(16);
             e.Property(p => p.Color).HasMaxLength(16);
+            e.Property(p => p.Frame).HasMaxLength(24);
+            e.Property(p => p.Background).HasMaxLength(24);
+            e.Property(p => p.Theme).HasMaxLength(24);
         });
 
         b.Entity<SavedProblem>(e =>

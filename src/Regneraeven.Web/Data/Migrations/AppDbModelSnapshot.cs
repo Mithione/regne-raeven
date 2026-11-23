@@ -105,12 +105,20 @@ namespace Regneraeven.Web.Data.Migrations
                         .HasMaxLength(16)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Background")
+                        .HasMaxLength(24)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Color")
                         .IsRequired()
                         .HasMaxLength(16)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Frame")
+                        .HasMaxLength(24)
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Grade")
@@ -129,6 +137,10 @@ namespace Regneraeven.Web.Data.Migrations
 
                     b.Property<int>("Streak")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Theme")
+                        .HasMaxLength(24)
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Xp")
                         .HasColumnType("INTEGER");

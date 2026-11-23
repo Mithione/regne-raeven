@@ -8,8 +8,8 @@ Programmet er bygget i .NET 8. Brugerfladen er en web-UI, der vises i et alminde
 
 | Område | Hvad kan man |
 |---|---|
-| **Profiler** | Flere børn kan bruge samme computer. Hver får sit eget dyr, sin egen farve og sit klassetrin (5. eller 6.), og klassetrinnet styrer sværhedsgraden. |
-| **Titler og unlocks** | Under »Din profil« ligger rævetitlerne og »Mine unlocks«: 11 tegnede ræve (lup, briller, lyn-pandebånd, polarhue, astronauthjelm, krone, troldmandshat …), der låses op ved samme levels som titlerne. Låste ræve vises gråtonede med »Låses op ved level X«. Ved level-up viser dialogen den nye ræv med en »Brug den nu«-knap. |
+| **Profiler** | Flere børn kan bruge samme computer. Alle starter som Rævehvalpen og vælger ringfarve og klassetrin (5. eller 6.), og klassetrinnet styrer sværhedsgraden. |
+| **Titler og unlocks** | Under »Din profil« ligger rævetitlerne og »Mine unlocks«. Man er altid en ræv: 11 tegnede ræve (lup, briller, lyn-pandebånd, polarhue, astronauthjelm, krone, troldmandshat …) låses op ved titel-levels. Derimellem låses **rammer** om avataren (prikker, neon, guld, regnbue, stjerner), **baggrunde** (himmel, solnedgang, talmønster, skov, stjernehimmel, regnbue) og **farvetemaer** for hele programmet (skov, hav, lilla, jordbær, is, nat, guld) op – så de første levels giver noget nyt næsten hver gang. Level-up-dialogen viser det nye. |
 | **Regneregler** | Forklaringer med opstillinger og eksempler. Emnerne er plus, minus, gange, division, regnearternes rækkefølge, negative tal, decimaltal, enheder, brøker, procent, ligninger, geometri, koordinatsystem og tekststykker. |
 | **Trin for trin** | Skriv et regnestykke, så regner ræven et *lignende* stykke med andre tal, ét trin ad gangen, fx »gange før plus« eller »find fællesnævneren«. Barnet ser metoden uden at få sit eget svar serveret. |
 | **Tabeller** | Gangetabellen (op til 12) med markering. Man kan øve en tabel og få grøn eller rød feedback. Der er også tabeller over brøk, decimaltal og procent, over enheder og over kvadrattal. |

@@ -78,9 +78,9 @@ public class UnlockTests
     }
 
     [Fact]
-    public void Avatars_can_only_be_used_once_unlocked()
+    public void Only_unlocked_foxes_can_be_used()
     {
-        Assert.True(Unlocks.CanUse("🐼", 1));
+        Assert.False(Unlocks.CanUse("🐼", 99)); // no more start animals – foxes only
         Assert.True(Unlocks.CanUse("fox:hvalp", 1));
         Assert.False(Unlocks.CanUse("fox:briller", 9));
         Assert.True(Unlocks.CanUse("fox:briller", 10));
@@ -88,5 +88,40 @@ public class UnlockTests
         Assert.False(Unlocks.CanUse("<script>", 99));
         Assert.Equal(["briller"], Unlocks.UnlockedBetween(9, 12).Select(a => a.Id));
         Assert.Equal("lyn", Unlocks.Next(10)!.Id);
+    }
+
+    [Theory]
+    [InlineData(UnlockKind.Frame)]
+    [InlineData(UnlockKind.Background)]
+    [InlineData(UnlockKind.Theme)]
+    public void Each_kind_has_a_free_default_and_unique_ids(UnlockKind kind)
+    {
+        var items = Unlocks.Of(kind);
+        Assert.Equal(1, items[0].Level);
+        Assert.Equal(items.Count, items.Select(i => i.Id).Distinct().Count());
+        Assert.All(items, i => Assert.True(i.Id.Length <= 24 && i.Id.All(c => c is >= 'a' and <= 'z'), i.Id)); // safe as css class
+        Assert.Equal(items.OrderBy(i => i.Level).Select(i => i.Id), items.Select(i => i.Id));
+    }
+
+    [Fact]
+    public void Something_unlocks_at_almost_every_early_level()
+    {
+        for (var level = 2; level <= 10; level++)
+        {
+            var anything = Unlocks.UnlockedBetween(level - 1, level).Any() || Unlocks.CosmeticsUnlockedBetween(level - 1, level).Any();
+            Assert.True(anything, $"Intet nyt på level {level}");
+        }
+    }
+
+    [Fact]
+    public void Locked_or_unknown_choices_fall_back_to_the_default()
+    {
+        Assert.Equal("klassisk", Unlocks.Current(UnlockKind.Frame, "regnbue", 5).Id);
+        Assert.Equal("regnbue", Unlocks.Current(UnlockKind.Frame, "regnbue", 27).Id);
+        Assert.Equal("raev", Unlocks.Current(UnlockKind.Theme, "findes-ikke", 99).Id);
+        Assert.False(Unlocks.CanUse(UnlockKind.Theme, "skov", 3));
+        Assert.True(Unlocks.CanUse(UnlockKind.Theme, "skov", 4));
+        Assert.Equal((3, "🖼️", "Ramme: Prikker"), Unlocks.NextAnything(2));
+        Assert.Contains(Unlocks.CosmeticsUnlockedBetween(7, 8), n => n.Name == "Neon");
     }
 }

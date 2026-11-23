@@ -166,19 +166,24 @@
     const title = lu.newTitles && lu.newTitles.length ? lu.newTitles[lu.newTitles.length - 1] : null;
     // The drawing comes from the server's own fixed SVG set (no user content).
     const fox = lu.newAvatars && lu.newAvatars.length ? lu.newAvatars[lu.newAvatars.length - 1] : null;
+    const items = lu.newItems || [];
     const o = document.createElement('div');
     o.className = 'overlay';
     o.innerHTML = `<div class="dialog">
         ${fox ? '' : `<div class="emoji">${title ? esc(title.icon) : '🎉'}</div>`}
         <h2>Level ${lu.to}!</h2>
-        ${title ? `<p>Ny titel: <b>${esc(title.icon)} ${esc(title.name)}</b></p>` : `<p>Flot klaret – du er steget i level.</p>`}
+        ${title ? `<p>Ny titel: <b>${esc(title.icon)} ${esc(title.name)}</b></p>` : (items.length ? '' : `<p>Flot klaret – du er steget i level.</p>`)}
+        ${items.length ? `<p>${items.map(i => `${esc(i.icon)} Ny ${esc(i.kindName.toLowerCase())}: <b>${esc(i.name)}</b>`).join('<br>')}</p>` : ''}
         ${fox ? `<div class="avatar drawn new-avatar">${fox.svg}</div>
                  <p>Du har låst en ny ræv op: <b>${esc(fox.name)}</b><br><span class="muted">${esc(fox.description)}</span></p>
                  <div class="row" style="justify-content:center">
                    <button class="btn big" type="button" data-use>Brug den nu</button>
                    <button class="btn secondary" type="button" data-close>Senere</button>
                  </div>`
-              : `<button class="btn big mt" type="button" data-close>Fedt! 🦊</button>`}
+              : `<div class="row" style="justify-content:center">
+                   ${items.length ? `<a class="btn big" href="/profiler/rediger#unlocks">Se mine unlocks</a>` : ''}
+                   <button class="btn ${items.length ? 'secondary' : 'big mt'}" type="button" data-close>Fedt! 🦊</button>
+                 </div>`}
       </div>`;
     const close = () => o.remove();
     o.querySelector('[data-close]').addEventListener('click', close);

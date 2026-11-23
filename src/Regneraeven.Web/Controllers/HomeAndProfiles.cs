@@ -45,7 +45,7 @@ public class ProfilesController(AppDb db, CurrentProfile current) : Controller
         var p = new Profile
         {
             Name = name,
-            Avatar = Unlocks.CanUse(form.Avatar, 1) ? form.Avatar! : Unlocks.Avatars[0].Key,
+            Avatar = Unlocks.Avatars[0].Key, // everyone starts as Rævehvalpen
             Color = Colors.Contains(form.Color) ? form.Color! : Colors[0],
             Grade = form.Grade is 5 or 6 ? form.Grade : 5,
         };
@@ -74,7 +74,6 @@ public class ProfilesController(AppDb db, CurrentProfile current) : Controller
         var name = (form.Name ?? "").Trim();
         if (name.Length == 0) throw new UserFacingException("Skriv et navn.");
         p.Name = name.Length > 40 ? name[..40] : name;
-        if (Unlocks.CanUse(form.Avatar, Leveling.FromXp(p.Xp).Level)) p.Avatar = form.Avatar!;
         if (Colors.Contains(form.Color)) p.Color = form.Color!;
         if (form.Grade is 5 or 6) p.Grade = form.Grade;
         await db.SaveChangesAsync();
@@ -102,9 +101,28 @@ public class ProfilesController(AppDb db, CurrentProfile current) : Controller
         p.Avatar = avatar!;
         await db.SaveChangesAsync();
         if (Request.Headers.Accept.ToString().Contains("json", StringComparison.OrdinalIgnoreCase))
-            return Json(new { ok = true, html = Ui.Avatar(p.Avatar, p.Color).ToHtml() });
+            return Json(new { ok = true, html = Ui.Avatar(p).ToHtml() });
         TempData["Info"] = Unlocks.Find(avatar) is { } fox ? $"Du er nu {fox.Name}! 🦊" : "Din avatar er skiftet.";
         return Redirect("/profiler/rediger#unlocks");
+    }
+
+    /// <summary>Choose an unlocked frame, background or colour theme.</summary>
+    [HttpPost("unlock")]
+    public async Task<IActionResult> ChooseUnlock(UnlockKind kind, string? id)
+    {
+        var p = await current.RequireAsync();
+        var item = Unlocks.Find(kind, id);
+        if (item is null || !Unlocks.IsUnlocked(item, Leveling.FromXp(p.Xp).Level))
+            throw new UserFacingException("Det er ikke låst op endnu.");
+        switch (kind)
+        {
+            case UnlockKind.Frame: p.Frame = item.Id; break;
+            case UnlockKind.Background: p.Background = item.Id; break;
+            case UnlockKind.Theme: p.Theme = item.Id; break;
+        }
+        await db.SaveChangesAsync();
+        TempData["Info"] = $"{Unlocks.Describe(kind).Name}: {item.Name} er valgt.";
+        return Redirect($"/profiler/rediger#{kind.ToString().ToLowerInvariant()}");
     }
 
     [HttpPost("slet")]

@@ -12,7 +12,6 @@ public sealed record ProfilesModel(List<Profile> Profiles, Profile? Current);
 public sealed class ProfileForm
 {
     public string? Name { get; set; }
-    public string? Avatar { get; set; }
     public string? Color { get; set; }
     public int Grade { get; set; } = 5;
 }
