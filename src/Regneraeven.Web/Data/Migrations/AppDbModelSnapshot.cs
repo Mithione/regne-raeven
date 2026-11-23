@@ -159,6 +159,12 @@ namespace Regneraeven.Web.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateOnly?>("DueDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsHomework")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("MyAnswer")
                         .HasMaxLength(200)
                         .HasColumnType("TEXT");
@@ -184,6 +190,8 @@ namespace Regneraeven.Web.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ProfileId", "UpdatedAt");
+
+                    b.HasIndex("ProfileId", "IsHomework", "DueDate");
 
                     b.ToTable("Problems");
                 });

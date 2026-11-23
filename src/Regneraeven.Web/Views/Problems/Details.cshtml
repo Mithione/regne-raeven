@@ -8,7 +8,7 @@
 }
 <div class="crumbs"><a href="/opgaver">Mine opgaver</a> ›</div>
 <div class="topbar">
-    <div class="row">@Ui.Status(p.Status) <span class="muted small">Gemt @Ui.When(p.CreatedAt)</span></div>
+    <div class="row">@Ui.Status(p.Status) @Ui.Due(p, Model.Today) <span class="muted small">Gemt @Ui.When(p.CreatedAt)@(p.IsHomework && p.DueDate is { } dd ? " · afleveres " + HomeworkDue.Long(dd) : "")</span></div>
     <div class="row">
         <a class="btn secondary small" href="/opgaver/@p.Id/rediger">✏️ Ret</a>
         <form method="post" action="/opgaver/@p.Id/slet" class="inline" onsubmit="return confirm('Slet opgaven?')">

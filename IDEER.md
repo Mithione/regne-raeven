@@ -4,9 +4,6 @@ Her samler vi ideer. Skriv dem ind under **Nye ideer**, og flyt dem videre, når
 
 ## Nye ideer
 
-- **Lektier:** et flueben »Det er en lektie« og en afleveringsdato på en gemt opgave.
-  - Filter »Lektier« i Mine opgaver, sorteret efter dato.
-  - »Lektier der skal afleveres snart« på forsiden, markeret når de er forsinkede.
 - **Læs regnereglerne højt** med en rolig stemme: en »🔊 Læs op«-knap på hver regel (og evt. på hvert afsnit).
   - I profilen: vælg **kvinde- eller mandestemme** og evt. tempo (langsom/normal).
   - Teknik: browserens/Windows' indbyggede oplæsning (`speechSynthesis`), sat lidt langsommere for en rolig stemme. Opstillinger og tegn som »·«, »:« og »3/4« skal skrives om til ord (»gange«, »divideret med«, »tre fjerdedele«), før de læses op.
@@ -45,6 +42,8 @@ Her samler vi ideer. Skriv dem ind under **Nye ideer**, og flyt dem videre, når
 - Billede af opgaven fra bogen gemt sammen med en gemt opgave.
 
 ## Lavet
+
+- **Lektier med dato** (23. nov. 2026): flueben + afleveringsdato, »Lektier der skal laves« på forsiden med forsinkede markeret, filter »Lektier« sorteret efter dato.
 
 - **Lær 10-finger-systemet** (23. nov. 2026): 18 lektioner på et tegnet dansk tastatur med fingerfarver, præcision og ord/min, 1–3 stjerner og XP pr. ny stjerne, lektion med regnestykker.
 

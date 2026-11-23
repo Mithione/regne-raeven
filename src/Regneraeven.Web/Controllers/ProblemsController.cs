@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Regneraeven.Core.Homework;
 using Regneraeven.Core.Maths;
 using Regneraeven.Core.Topics;
 using Regneraeven.Web.Data;
@@ -13,8 +14,10 @@ namespace Regneraeven.Web.Controllers;
 /// only open once the child has written their own answer.
 /// </summary>
 [Route("opgaver")]
-public class ProblemsController(AppDb db, CurrentProfile current) : Controller
+public class ProblemsController(AppDb db, CurrentProfile current, TimeProvider clock) : Controller
 {
+    private DateOnly Today => DateOnly.FromDateTime(clock.GetLocalNow().DateTime);
+
     [HttpGet("")]
     public async Task<IActionResult> Index(string? q, string? tag, string? status)
     {
@@ -42,13 +45,17 @@ public class ProblemsController(AppDb db, CurrentProfile current) : Controller
             "aabne" => list.Where(x => x.Status == ProblemStatus.Open),
             "rigtige" => list.Where(x => x.Status == ProblemStatus.Correct),
             "forkerte" => list.Where(x => x.Status == ProblemStatus.Wrong),
+            // Homework: overdue first, then by hand-in date; done ones last.
+            "lektier" => HomeworkDue.InOrder(list.Where(x => x.IsHomework), x => x.DueDate, x => x.IsDone),
             _ => list,
         };
-        return View(new ProblemListModel(list.ToList(), tagCounts, q, tag, status, all.Count));
+        var openHomework = all.Count(x => x.IsHomework && !x.IsDone);
+        return View(new ProblemListModel(list.ToList(), tagCounts, q, tag, status, all.Count, openHomework, Today));
     }
 
     [HttpGet("ny")]
-    public IActionResult Create(string? tekst) => View("Edit", new ProblemForm { Text = tekst });
+    public IActionResult Create(string? tekst, bool lektie = false) =>
+        View("Edit", new ProblemForm { Text = tekst, IsHomework = lektie, DueDate = lektie ? HomeworkDue.NextSchoolDay(Today) : null });
 
     [HttpPost("ny")]
     public async Task<IActionResult> Create(ProblemForm form)
@@ -75,7 +82,7 @@ public class ProblemsController(AppDb db, CurrentProfile current) : Controller
             try { solved = Expression.Solve(node, Expression.Render(node)); }
             catch (Exception ex) when (ex is FormatException or DivideByZeroException) { solveError = ex.Message; }
         }
-        return View(new ProblemDetailsModel(problem, isExpression, solved, solveError));
+        return View(new ProblemDetailsModel(problem, isExpression, solved, solveError, Today));
     }
 
     [HttpGet("{id:int}/rediger")]
@@ -89,6 +96,8 @@ public class ProblemsController(AppDb db, CurrentProfile current) : Controller
             Note = problem.Note,
             Topics = problem.Tags.Where(t => t.Topic is not null).Select(t => t.Name).ToList(),
             OwnTags = string.Join(", ", problem.Tags.Where(t => t.Topic is null).Select(t => t.Name)),
+            IsHomework = problem.IsHomework,
+            DueDate = problem.DueDate,
         });
     }
 
@@ -198,6 +207,8 @@ public class ProblemsController(AppDb db, CurrentProfile current) : Controller
         if (text.Length == 0) throw new UserFacingException("Skriv opgaven.");
         if (text.Length > 2000) text = text[..2000];
         problem.Text = text;
+        problem.IsHomework = form.IsHomework;
+        problem.DueDate = form.IsHomework ? form.DueDate : null;
         var note = form.Note?.Trim();
         problem.Note = string.IsNullOrEmpty(note) ? null : note.Length > 2000 ? note[..2000] : note;
         problem.UpdatedAt = DateTime.UtcNow;

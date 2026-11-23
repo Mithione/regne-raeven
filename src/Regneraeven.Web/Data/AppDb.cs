@@ -30,6 +30,8 @@ public class AppDb(DbContextOptions<AppDb> options) : DbContext(options)
             e.Property(p => p.Note).HasMaxLength(2000);
             e.Property(p => p.MyAnswer).HasMaxLength(200);
             e.HasIndex(p => new { p.ProfileId, p.UpdatedAt });
+            e.HasIndex(p => new { p.ProfileId, p.IsHomework, p.DueDate });
+            e.Ignore(p => p.IsDone);
             e.HasOne(p => p.Profile).WithMany().HasForeignKey(p => p.ProfileId).OnDelete(DeleteBehavior.Cascade);
             e.HasMany(p => p.Tags).WithOne().HasForeignKey(t => t.SavedProblemId).OnDelete(DeleteBehavior.Cascade);
         });

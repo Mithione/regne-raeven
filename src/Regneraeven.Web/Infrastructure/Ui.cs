@@ -75,6 +75,15 @@ public static class Ui
         return w.ToString();
     }
 
+    /// <summary>Hand-in badge for homework: "I morgen", "2 dage for sent" …</summary>
+    public static IHtmlContent Due(SavedProblem p, DateOnly today)
+    {
+        if (!p.IsHomework) return HtmlString.Empty;
+        var info = Core.Homework.HomeworkDue.Describe(p.DueDate, today, p.IsDone);
+        var title = p.DueDate is { } d ? " title=\"Afleveres " + E(Core.Homework.HomeworkDue.Long(d)) + "\"" : "";
+        return new HtmlString($"<span class=\"due due-{info.State.ToString().ToLowerInvariant()}\"{title}>📚 {E(info.Text)}</span>");
+    }
+
     public static string Difficulty(int d) => d switch { 1 => "Let", 2 => "Middel", _ => "Svær" };
 
     public static string Stars(int d) => new string('★', d) + new string('☆', 3 - d);

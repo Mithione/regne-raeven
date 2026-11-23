@@ -46,9 +46,15 @@ public class SavedProblem
     public string? Note { get; set; }
     public string? MyAnswer { get; set; }
     public ProblemStatus Status { get; set; }
+    /// <summary>Homework (lektie) with an optional hand-in date.</summary>
+    public bool IsHomework { get; set; }
+    public DateOnly? DueDate { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public List<ProblemTag> Tags { get; set; } = [];
+
+    /// <summary>Homework counts as done once the child has written an answer.</summary>
+    public bool IsDone => Status != ProblemStatus.Open;
 }
 
 /// <summary>A tag: either a topic slug ("broeker") or the child's own word ("lektier uge 47").</summary>

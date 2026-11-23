@@ -5,7 +5,7 @@ using Regneraeven.Web.Data;
 
 namespace Regneraeven.Web.Models;
 
-public sealed record HomeModel(Profile Profile, List<GameTask> Daily, List<SavedProblem> RecentProblems, int XpThisWeek, int Streak);
+public sealed record HomeModel(Profile Profile, List<GameTask> Daily, List<SavedProblem> RecentProblems, int XpThisWeek, int Streak, List<SavedProblem> Homework, DateOnly Today);
 
 public sealed record ProfilesModel(List<Profile> Profiles, Profile? Current);
 
@@ -20,7 +20,7 @@ public sealed record StepsModel(string? Input, string? Error, SolveResult? Simil
 
 public sealed record TagCount(string Name, int Count, TopicInfo? Topic);
 
-public sealed record ProblemListModel(List<SavedProblem> Problems, List<TagCount> Tags, string? Query, string? Tag, string? Status, int Total);
+public sealed record ProblemListModel(List<SavedProblem> Problems, List<TagCount> Tags, string? Query, string? Tag, string? Status, int Total, int OpenHomework, DateOnly Today);
 
 public sealed class ProblemForm
 {
@@ -29,9 +29,11 @@ public sealed class ProblemForm
     public string? Note { get; set; }
     public List<string>? Topics { get; set; }
     public string? OwnTags { get; set; }
+    public bool IsHomework { get; set; }
+    public DateOnly? DueDate { get; set; }
 }
 
-public sealed record ProblemDetailsModel(SavedProblem Problem, bool IsExpression, SolveResult? Solved, string? SolveError);
+public sealed record ProblemDetailsModel(SavedProblem Problem, bool IsExpression, SolveResult? Solved, string? SolveError, DateOnly Today);
 
 public sealed record GameHubModel(Profile Profile, List<GameTask> Daily, int Streak, List<XpEvent> RecentXp, Dictionary<Topic, int> SolvedByTopic);
 

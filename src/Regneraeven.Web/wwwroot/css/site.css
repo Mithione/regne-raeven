@@ -515,3 +515,23 @@ kbd { display: inline-block; min-width: 1.5em; padding: 0 5px; border-radius: 6p
 .big-stars { font-size: 3.2rem; color: #f5b301; letter-spacing: 6px; line-height: 1.1; }
 .big-stars.s0 { color: #d0d5dd; }
 @media (max-width: 900px) { .kb-key { height: 38px; font-size: .85rem; } .typing-text { font-size: 1.3rem; } }
+
+/* ---------- Homework (lektier) ---------- */
+.due { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: .82rem; font-weight: 800; white-space: nowrap; }
+.due-overdue { background: var(--red-soft); color: var(--red); border: 1px solid #f3c5c0; }
+.due-today { background: #fff1d6; color: #b54708; border: 1px solid #fcd9a0; }
+.due-tomorrow { background: #fff7e6; color: #b54708; }
+.due-soon { background: var(--blue-soft); color: #1d4ed8; }
+.due-later { background: #f2f4f7; color: var(--muted); }
+.due-done { background: var(--green-soft); color: var(--green); }
+.homework-box { border: 2px dashed var(--line-2); border-radius: 14px; padding: 12px 14px; }
+.homework-box:has(input[data-homework]:checked) { border-style: solid; border-color: var(--fox); background: var(--fox-soft); }
+label.check { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; cursor: pointer; }
+label.check input { width: 20px; height: 20px; accent-color: var(--fox); }
+input[type=date] { font: inherit; color: var(--ink); background: #fff; border: 2px solid var(--line-2); border-radius: 12px; padding: 9px 12px; }
+.homework-list { display: flex; flex-direction: column; gap: 8px; }
+.homework-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--line); background: #fff; color: var(--ink); }
+.homework-item:hover { text-decoration: none; border-color: var(--fox); }
+.homework-item .txt { flex: 1; min-width: 0; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.homework-item.overdue { border-color: #f3c5c0; background: #fffafa; }
+.btn.on-filter { border-color: var(--fox); background: var(--fox-soft); color: var(--fox-dark); }

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Regneraeven.Core.Homework;
 using Regneraeven.Core.Progress;
 using Regneraeven.Web.Data;
 using Regneraeven.Web.Infrastructure;
@@ -17,7 +18,10 @@ public class HomeController(AppDb db, CurrentProfile current, GameService game) 
         var daily = await game.GetDailyAsync(p);
         var problems = await db.Problems.Include(x => x.Tags).Where(x => x.ProfileId == p.Id)
             .OrderByDescending(x => x.UpdatedAt).Take(4).ToListAsync();
-        return View(new HomeModel(p, daily, problems, await game.XpThisWeekAsync(p), CurrentProfile.LiveStreak(p, game.Today)));
+        var homework = await db.Problems.Include(x => x.Tags)
+            .Where(x => x.ProfileId == p.Id && x.IsHomework && x.Status == ProblemStatus.Open).ToListAsync();
+        homework = HomeworkDue.InOrder(homework, x => x.DueDate, x => x.IsDone).Take(5).ToList();
+        return View(new HomeModel(p, daily, problems, await game.XpThisWeekAsync(p), CurrentProfile.LiveStreak(p, game.Today), homework, game.Today));
     }
 
     [HttpGet("fejl"), AllowWithoutProfile]

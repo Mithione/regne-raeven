@@ -59,6 +59,27 @@
     <div class="mt"><partial name="_DailyStrip" model="(Model.Daily, (int?)null)" /></div>
 </div>
 
+@if (Model.Homework.Count > 0)
+{
+    <div class="card mt">
+        <div class="row between">
+            <h2 style="margin:0">📚 Lektier der skal laves</h2>
+            <a href="/opgaver?status=lektier">Alle lektier →</a>
+        </div>
+        <div class="homework-list mt">
+            @foreach (var h in Model.Homework)
+            {
+                var late = HomeworkDue.Describe(h.DueDate, Model.Today, h.IsDone).State == DueState.Overdue;
+                <a class="homework-item @(late ? "overdue" : "")" href="/opgaver/@h.Id">
+                    <span class="txt">@h.Text</span>
+                    <span class="chips">@foreach (var t in h.Tags.Where(t => t.Topic is not null).Take(2)) { @Ui.Tag(t.Name) }</span>
+                    @Ui.Due(h, Model.Today)
+                </a>
+            }
+        </div>
+    </div>
+}
+
 <div class="grid four mt">
     <a class="tile" href="/regler" style="--c:#2563eb">
         <span class="sym">📘</span><h3>Regneregler</h3><p>Sådan regner du – med eksempler.</p>
@@ -69,8 +90,8 @@
     <a class="tile" href="/tabeller" style="--c:#0e9384">
         <span class="sym">🔢</span><h3>Tabeller</h3><p>Gangetabel, brøker, enheder.</p>
     </a>
-    <a class="tile" href="/opgaver/ny" style="--c:#f26b1d">
-        <span class="sym">＋</span><h3>Gem en opgave</h3><p>Skriv en opgave fra bogen eller lektierne.</p>
+    <a class="tile" href="/opgaver/ny?lektie=true" style="--c:#f26b1d">
+        <span class="sym">📚</span><h3>Gem en lektie</h3><p>Skriv eller indtal en lektie – med afleveringsdato.</p>
     </a>
 </div>
 

@@ -392,6 +392,15 @@
       text.dispatchEvent(new Event('input', { bubbles: true }));
       text.focus();
     });
+    // Homework: show the date when ticked, and suggest the next school day.
+    const hw = form.querySelector('[data-homework]');
+    const dueRow = form.querySelector('[data-due]');
+    const dueInput = form.querySelector('input[name=DueDate]');
+    hw?.addEventListener('change', () => {
+      dueRow.classList.toggle('hidden', !hw.checked);
+      if (hw.checked && !dueInput.value) dueInput.value = dueInput.dataset.default;
+      if (hw.checked) dueInput.focus();
+    });
     dictation(text, form.querySelector('[data-mic]'), form.querySelector('[data-mic-status]'));
     if (text.value.trim()) run();
   }

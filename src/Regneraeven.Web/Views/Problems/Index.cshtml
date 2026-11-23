@@ -18,7 +18,10 @@
         <h1>Mine opgaver</h1>
         <div class="muted">Gem opgaver fra bogen eller lektierne. Tag dem, så du kan finde dem igen.</div>
     </div>
-    <a class="btn big" href="/opgaver/ny">＋ Gem en opgave</a>
+    <div class="row">
+        <a class="btn secondary @(Model.Status == "lektier" ? "on-filter" : "")" href="@(Model.Status == "lektier" ? "/opgaver" : "/opgaver?status=lektier")">📚 Lektier@(Model.OpenHomework > 0 ? $" ({Model.OpenHomework})" : "")</a>
+        <a class="btn big" href="/opgaver/ny">＋ Gem en opgave</a>
+    </div>
 </div>
 
 @if (Model.Total == 0)
@@ -38,6 +41,7 @@ else
             @if (!string.IsNullOrEmpty(Model.Tag)) { <input type="hidden" name="tag" value="@Model.Tag"> }
             <select name="status" onchange="this.form.submit()" style="max-width:190px">
                 <option value="alle" selected="@(Model.Status is null or "alle")">Alle</option>
+                <option value="lektier" selected="@(Model.Status == "lektier")">📚 Lektier</option>
                 <option value="aabne" selected="@(Model.Status == "aabne")">Ikke regnet</option>
                 <option value="rigtige" selected="@(Model.Status == "rigtige")">Rigtige</option>
                 <option value="forkerte" selected="@(Model.Status == "forkerte")">Prøv igen</option>
@@ -62,7 +66,7 @@ else
         {
             <a class="problem-item" href="/opgaver/@p.Id">
                 <span class="txt">@p.Text</span>
-                <span>@Ui.Status(p.Status)</span>
+                <span class="row" style="gap:6px;justify-content:flex-end">@Ui.Due(p, Model.Today) @Ui.Status(p.Status)</span>
                 <span class="chips">@foreach (var t in p.Tags) { @Ui.Tag(t.Name) }</span>
                 <span class="muted small nowrap">@Ui.When(p.UpdatedAt)</span>
             </a>
