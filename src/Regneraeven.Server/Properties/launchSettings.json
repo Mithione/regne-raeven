@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "local": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5188",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ConnectionStrings__Regneraeven": "Server=(localdb)\\MSSQLLocalDB;Database=Regneraeven;Trusted_Connection=True;TrustServerCertificate=True",
+        "Registration__InviteCode": "raev"
+      }
+    }
+  }
+}

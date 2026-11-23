@@ -71,6 +71,7 @@ src/Regneraeven.Core/      Ren .NET-kode uden web eller Windows:
   Help/                    Regnereglerne (tekst)
 src/Regneraeven.Web/       Hele appen som Razor class library: controllere, views, css/js, EF Core (SQLite)
 src/Regneraeven.Desktop/   Windows-programmet: WinForms + WebView2, server på 127.0.0.1, adgangsnøgle
+src/Regneraeven.Server/    Hjemmesiden: forælder-login (ASP.NET Identity), SQL Server, Azure Container Apps
 tests/Regneraeven.Core.Tests/
 ```
 
@@ -81,13 +82,12 @@ dotnet tool restore
 dotnet ef migrations add <Navn> -p src/Regneraeven.Web -s src/Regneraeven.Desktop -o Data/Migrations
 ```
 
-## Fra Windows-program til hjemmeside
+## Hjemmeside på Azure
 
-Al logik og hele brugerfladen ligger i `Regneraeven.Core` og `Regneraeven.Web`. Windows-delen er kun et tyndt lag. En hjemmeside kræver:
+`src/Regneraeven.Server` er den samme app som hjemmeside: forælder-konti (hver forælder ser kun sine egne børn), Azure SQL og valgfri invitationskode. Den køres som container på Azure Container Apps og koster ca. 0 kr./md. med de gratis kvoter. Se **[docs/azure.md](docs/azure.md)** for opsætning, priser og opdatering.
 
-1. Et nyt projekt `Regneraeven.Server` (`net8.0`, Microsoft.NET.Sdk.Web), der kalder `builder.Services.AddRegneraeven(...)` og `app.UseRegneraeven()`, ligesom Desktop gør.
-2. Login for forældre, fx ASP.NET Core Identity. Profilerne kobles til forælderens konto (stedet er markeret i `Profile`), og `CurrentProfile` tjekker, at profilen tilhører den, der er logget ind.
-3. Eventuelt SQL Server eller PostgreSQL i stedet for SQLite. Det er en ny EF-provider plus nye migrations.
+- `Dockerfile` bygger hjemmesiden, `infra/main.bicep` opretter alt i Azure.
+- GitHub Actions (`.github/workflows/ci.yml`) kører tests og lægger containeren på GitHub Container Registry ved push til `main`.
 
 ## Sikkerhed
 

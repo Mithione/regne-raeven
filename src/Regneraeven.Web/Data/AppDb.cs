@@ -17,6 +17,8 @@ public class AppDb(DbContextOptions<AppDb> options) : DbContext(options)
         b.Entity<Profile>(e =>
         {
             e.Property(p => p.Name).HasMaxLength(40);
+            e.Property(p => p.OwnerId).HasMaxLength(64);
+            e.HasIndex(p => p.OwnerId);
             e.Property(p => p.Avatar).HasMaxLength(16);
             e.Property(p => p.Color).HasMaxLength(16);
             e.Property(p => p.Frame).HasMaxLength(24);

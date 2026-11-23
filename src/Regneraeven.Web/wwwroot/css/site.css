@@ -130,7 +130,7 @@ p { margin: 0 0 .8em; }
 .btn[disabled] { opacity: .5; cursor: not-allowed; }
 form.inline { display: inline; }
 
-input[type=text], input[type=search], input[type=number], textarea, select {
+input[type=text], input[type=search], input[type=number], input[type=password], input[type=email], textarea, select {
   font: inherit; color: var(--ink); background: #fff; border: 2px solid var(--line-2); border-radius: 12px;
   padding: 11px 14px; width: 100%; outline: none; transition: border-color .15s, box-shadow .15s;
 }

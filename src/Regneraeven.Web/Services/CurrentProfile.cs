@@ -10,21 +10,34 @@ namespace Regneraeven.Web.Services;
 public class UserFacingException(string message) : Exception(message);
 
 /// <summary>
-/// Which child is using the program right now. On the desktop it is remembered in a cookie;
-/// a future website would tie profiles to a logged-in parent instead.
+/// Which child is using the program right now (remembered in a cookie). On the website the
+/// profiles also belong to the logged-in parent, and only their own children can be chosen.
 /// </summary>
-public class CurrentProfile(AppDb db, IHttpContextAccessor http)
+public class CurrentProfile(AppDb db, IHttpContextAccessor http, Regneraeven.Web.RegneraevenOptions options)
 {
     public const string CookieName = "rr.profile";
     private Profile? _profile;
     private bool _loaded;
+
+    /// <summary>The logged-in parent's id on the website; null in the Windows program.</summary>
+    public string? OwnerId => options.ProfilesPerAccount
+        ? http.HttpContext?.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "(ingen)"
+        : null;
+
+    /// <summary>The profiles this user may see: all of them on the desktop, the parent's own on the website.</summary>
+    public IQueryable<Profile> Mine()
+    {
+        if (!options.ProfilesPerAccount) return db.Profiles;
+        var owner = OwnerId;
+        return db.Profiles.Where(p => p.OwnerId == owner);
+    }
 
     public async Task<Profile?> GetAsync()
     {
         if (_loaded) return _profile;
         _loaded = true;
         var raw = http.HttpContext?.Request.Cookies[CookieName];
-        if (int.TryParse(raw, out var id)) _profile = await db.Profiles.FirstOrDefaultAsync(p => p.Id == id);
+        if (int.TryParse(raw, out var id)) _profile = await Mine().FirstOrDefaultAsync(p => p.Id == id);
         return _profile;
     }
 

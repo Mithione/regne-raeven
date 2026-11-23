@@ -17,9 +17,9 @@ Her samler vi ideer. Skriv dem ind under **Nye ideer**, og flyt dem videre, når
 
 ## Planlagt
 
-- **GitHub:** opret repo under Mithione-kontoen og push.
-- **Hjemmeside:** nyt host-projekt (`Regneraeven.Server`), login for forældre og profiler koblet til forælderens konto. Se README → »Fra Windows-program til hjemmeside«.
-- **Domæne:** tjek om `regneraeven.dk` er ledigt (punktum.dk), før det bliver en hjemmeside.
+- **Hjemmeside i drift:** følg `docs/azure.md` for at oprette den i Azure (ca. 0 kr./md.).
+- **Domæne:** tjek om `regneraeven.dk` er ledigt (punktum.dk).
+- **Hjemmeside-forbedringer:** »Glemt adgangskode« via e-mail, managed identity til databasen, automatisk udrulning fra GitHub Actions.
 
 ## Mulige forbedringer
 
@@ -33,6 +33,9 @@ Her samler vi ideer. Skriv dem ind under **Nye ideer**, og flyt dem videre, når
 - Billede af opgaven fra bogen gemt sammen med en gemt opgave.
 
 ## Lavet
+
+- **Hjemmeside-udgave forberedt til Azure** (23. nov. 2026): server-projekt med forælder-login og Azure SQL, Dockerfile, GitHub Actions og Bicep-skabelon.
+- **GitHub** (23. nov. 2026): privat repo Mithione/regne-raeven.
 
 - **Læs regnereglerne højt** (23. nov. 2026): 🔊-knapper på reglerne, matematik læses som ord, kvinde-/mandestemme og tempo under profilen (kun dansk kvindestemme på computeren i dag).
 

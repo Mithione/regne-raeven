@@ -135,6 +135,10 @@ namespace Regneraeven.Web.Data.Migrations
                         .HasMaxLength(40)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("OwnerId")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
                     b.Property<int?>("ShownTitleLevel")
                         .HasColumnType("INTEGER");
 
@@ -174,6 +178,8 @@ namespace Regneraeven.Web.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("Profiles");
                 });

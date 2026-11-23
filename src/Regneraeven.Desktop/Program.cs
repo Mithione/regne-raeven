@@ -95,7 +95,7 @@ public static class Program
             builder.WebHost.UseUrls("http://localhost:5187");
 
         builder.Services.AddSingleton<LocalAccess>();
-        builder.Services.AddRegneraeven(new RegneraevenOptions { DatabasePath = Path.Combine(DataFolder, "regneraeven.db") });
+        builder.Services.AddRegneraeven(RegneraevenOptions.Sqlite(Path.Combine(DataFolder, "regneraeven.db")));
 
         var app = builder.Build();
         app.UseMiddleware<LocalAccessMiddleware>();

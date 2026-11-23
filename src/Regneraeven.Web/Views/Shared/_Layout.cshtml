@@ -47,6 +47,10 @@
             </a>
             <form method="post" action="/profiler/skift" class="center"><button class="btn ghost small" type="submit">Skift person</button></form>
         }
+        @if (Context.RequestServices.GetRequiredService<RegneraevenOptions>().LogoutPath is { } logout && User.Identity?.IsAuthenticated == true)
+        {
+            <form method="post" action="@logout" class="center"><button class="btn ghost small" type="submit" title="@User.Identity.Name">Log ud</button></form>
+        }
     </aside>
     <main class="main">
         @if (TempData["Error"] is string err) { <div class="alert error">@err</div> }

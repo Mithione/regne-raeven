@@ -1,0 +1,14 @@
+**/bin/
+**/obj/
+**/App_Data/
+publish/
+.git/
+.github/
+.claude/
+.config/
+tests/
+infra/
+docs/
+src/Regneraeven.Desktop/
+*.md
+*.zip

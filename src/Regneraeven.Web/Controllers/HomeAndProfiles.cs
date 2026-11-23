@@ -24,7 +24,7 @@ public class HomeController(AppDb db, CurrentProfile current, GameService game) 
         return View(new HomeModel(p, daily, problems, await game.XpThisWeekAsync(p), CurrentProfile.LiveStreak(p, game.Today), homework, game.Today));
     }
 
-    [HttpGet("fejl"), AllowWithoutProfile]
+    [HttpGet("fejl"), AllowWithoutProfile, Microsoft.AspNetCore.Authorization.AllowAnonymous]
     public IActionResult Error() => View();
 }
 
@@ -36,7 +36,7 @@ public class ProfilesController(AppDb db, CurrentProfile current) : Controller
     [HttpGet(""), AllowWithoutProfile]
     public async Task<IActionResult> Index()
     {
-        var profiles = await db.Profiles.OrderBy(p => p.Name).ToListAsync();
+        var profiles = await current.Mine().OrderBy(p => p.Name).ToListAsync();
         return View(new ProfilesModel(profiles, await current.GetAsync()));
     }
 
@@ -53,6 +53,7 @@ public class ProfilesController(AppDb db, CurrentProfile current) : Controller
             Color = Colors.Contains(form.Color) ? form.Color! : Colors[0],
             Grade = form.Grade is 5 or 6 ? form.Grade : 5,
         };
+        p.OwnerId = current.OwnerId;
         db.Profiles.Add(p);
         await db.SaveChangesAsync();
         current.Select(p.Id);
@@ -63,7 +64,7 @@ public class ProfilesController(AppDb db, CurrentProfile current) : Controller
     [HttpPost("{id:int}/vaelg"), AllowWithoutProfile]
     public async Task<IActionResult> Choose(int id)
     {
-        if (!await db.Profiles.AnyAsync(p => p.Id == id)) throw new UserFacingException("Profilen findes ikke.");
+        if (!await current.Mine().AnyAsync(p => p.Id == id)) throw new UserFacingException("Profilen findes ikke.");
         current.Select(id);
         return Redirect("/");
     }

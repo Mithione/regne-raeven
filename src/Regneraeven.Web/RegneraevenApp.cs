@@ -10,8 +10,24 @@ namespace Regneraeven.Web;
 
 public sealed class RegneraevenOptions
 {
-    /// <summary>Full path of the SQLite database file.</summary>
-    public required string DatabasePath { get; init; }
+    /// <summary>Chooses the database: SQLite for the Windows program, SQL Server for the website.</summary>
+    public required Action<DbContextOptionsBuilder> ConfigureDatabase { get; init; }
+
+    /// <summary>
+    /// Website mode: every profile belongs to the logged-in parent account (the user id claim),
+    /// and a parent only sees their own children. Off in the Windows program.
+    /// </summary>
+    public bool ProfilesPerAccount { get; init; }
+
+    /// <summary>When set, the menu shows a "Log ud" button that posts here.</summary>
+    public string? LogoutPath { get; init; }
+
+    /// <summary>The Windows program: a SQLite file on this computer.</summary>
+    public static RegneraevenOptions Sqlite(string databasePath)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(databasePath)!);
+        return new RegneraevenOptions { ConfigureDatabase = o => o.UseSqlite($"Data Source={databasePath}") };
+    }
 }
 
 /// <summary>
@@ -22,9 +38,8 @@ public static class RegneraevenApp
 {
     public static IServiceCollection AddRegneraeven(this IServiceCollection services, RegneraevenOptions options)
     {
-        Directory.CreateDirectory(Path.GetDirectoryName(options.DatabasePath)!);
         services.AddSingleton(options);
-        services.AddDbContext<AppDb>(o => o.UseSqlite($"Data Source={options.DatabasePath}"));
+        services.AddDbContext<AppDb>(options.ConfigureDatabase);
         services.AddHttpContextAccessor();
         services.AddSingleton(TimeProvider.System);
         services.AddScoped<CurrentProfile>();
@@ -46,7 +61,7 @@ public static class RegneraevenApp
         return services;
     }
 
-    /// <summary>Creates/updates the database and maps the pages. Call after any host-specific middleware.</summary>
+    /// <summary>Creates/updates the database and maps the pages. Call after any host-specific middleware (login etc.).</summary>
     public static WebApplication UseRegneraeven(this WebApplication app)
     {
         var da = CultureInfo.GetCultureInfo("da-DK");
@@ -59,6 +74,11 @@ public static class RegneraevenApp
         if (!app.Environment.IsDevelopment()) app.UseExceptionHandler("/fejl");
         app.UseStaticFiles();
         app.UseRouting();
+        if (app.Services.GetRequiredService<RegneraevenOptions>().ProfilesPerAccount)
+        {
+            app.UseAuthentication();
+            app.UseAuthorization();
+        }
         app.MapControllers();
         return app;
     }

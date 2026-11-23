@@ -35,7 +35,8 @@ public class Profile
     public int? ShownTitleLevel { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    // A future website will add an owner (parent account) here.
+    /// <summary>The parent account that owns this profile on the website (null in the Windows program).</summary>
+    public string? OwnerId { get; set; }
 }
 
 public enum ProblemStatus
